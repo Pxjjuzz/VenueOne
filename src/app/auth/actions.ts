@@ -23,10 +23,12 @@ export async function googleSignInAction(
   }
 
   const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") || headerStore.get("host");
+  const proto = headerStore.get("x-forwarded-proto") || "https";
   const origin =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
     headerStore.get("origin") ||
-    "http://localhost:3000";
+    (host ? `${proto}://${host}` : "http://localhost:3000");
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
