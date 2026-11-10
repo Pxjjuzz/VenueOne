@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { dbQuery } from "@/lib/db";
@@ -149,12 +150,28 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   if (!isSupabaseConfigured()) return null;
 
   try {
+    const cookieStore = await cookies();
+    const hasAuthCookie = cookieStore
+      .getAll()
+      .some((c) => c.name.includes("-auth-token") || (c.name.startsWith("sb-") && c.name.endsWith("-token")));
+
+    // Quick exit: anonymous visitor has no session cookies, avoid remote API hop
+    if (!hasAuthCookie) return null;
+
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser();
     if (error || !user) return null;
+
+    // Fast path: load profile directly without performing writes on read requests
+    const existing = await dbQuery<ProfileRow>("select * from profiles where id = $1 limit 1", [user.id]);
+    if (existing[0]) {
+      return toSessionUser(existing[0], false);
+    }
+
+    // Fallback: sync profile only if not yet present in database
     const profile = await syncSupabaseProfile(user);
     return profile ? toSessionUser(profile, false) : null;
   } catch (error) {

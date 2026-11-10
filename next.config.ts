@@ -17,6 +17,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  compress: true,
   poweredByHeader: false,
   serverExternalPackages: ["@electric-sql/pglite"],
   experimental: {

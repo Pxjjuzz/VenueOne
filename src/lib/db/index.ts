@@ -98,10 +98,11 @@ function createRemoteDatabase(url: string): Database {
   const isLocalHost = /(^|@)(localhost|127\.0\.0\.1)(:|\/)/.test(url);
   const client = postgres(url, {
     ssl: isLocalHost ? false : "require",
-    max: 5,
-    idle_timeout: 20,
-    connect_timeout: 15,
+    max: 10,
+    idle_timeout: 30,
+    connect_timeout: 10,
     prepare: false,
+    fetch_types: false,
   });
 
   const sql: Sql = async <T = SqlRow>(text: string, params: readonly SqlParam[] = []) => {

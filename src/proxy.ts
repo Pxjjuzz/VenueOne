@@ -11,6 +11,16 @@ export async function proxy(request: NextRequest) {
 
   let response = NextResponse.next({ request });
 
+  const allCookies = request.cookies.getAll();
+  const hasAuthCookie = allCookies.some(
+    (c) => c.name.includes("-auth-token") || (c.name.startsWith("sb-") && c.name.endsWith("-token")),
+  );
+
+  // Skip remote auth handshake if the visitor has no Supabase session cookie
+  if (!hasAuthCookie) {
+    return response;
+  }
+
   const supabase = createServerClient(supabaseUrl, anonKey, {
     cookies: {
       getAll() {
