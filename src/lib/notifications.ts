@@ -49,16 +49,17 @@ async function sendEmail(
     textLayout([title, "", body], { url: absoluteLink, label: `Open ${brand.name}` });
 
   // 1. Primary transport: Gmail system via Nodemailer
-  if (process.env.GMAIL_USER?.trim() && process.env.GMAIL_APP_PASSWORD?.trim()) {
-    const result = await sendMail({
-      to: recipient.email,
-      subject: title,
-      html,
-      text,
-    });
+  const mailResult = await sendMail({
+    to: recipient.email,
+    subject: title,
+    html,
+    text,
+  });
+
+  if (mailResult.status === "sent") {
     return {
-      status: result.status,
-      providerId: result.messageId,
+      status: "sent",
+      providerId: mailResult.messageId,
     };
   }
 
@@ -95,7 +96,7 @@ async function sendEmail(
     }
   }
 
-  return { status: "skipped", providerId: null };
+  return { status: mailResult.status, providerId: null };
 }
 
 async function deliver(recipients: Recipient[], input: NotifyInput) {
@@ -154,6 +155,7 @@ export async function sendGreetingOnLogin(
     const existing = await dbQuery<{ id: string }>(
       `select id from notifications
        where user_id = $1 and type = 'auth.greeting'
+         and email_status = 'sent'
          and created_at > now() - interval '6 hours'
        limit 1`,
       [userId],

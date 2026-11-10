@@ -34,7 +34,8 @@ export function getSupportEmail(): string {
 
 function getTransporter(): Transporter | null {
   const user = getGmailUser();
-  const pass = process.env.GMAIL_APP_PASSWORD?.trim();
+  const rawPass = process.env.GMAIL_APP_PASSWORD?.trim();
+  const pass = rawPass ? rawPass.replace(/\s+/g, "") : null;
 
   if (!user || !pass) {
     return null;
@@ -42,11 +43,16 @@ function getTransporter(): Transporter | null {
 
   if (!cachedTransporter) {
     cachedTransporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user,
         pass,
       },
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 50,
     });
   }
 
@@ -84,9 +90,7 @@ export async function sendMail(options: SendEmailOptions): Promise<MailResult> {
       text: options.text,
       headers: {
         "X-Entity-Ref-ID": `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        "X-Mailer": `${brand.name} Platform Mailer`,
-        "Precedence": "bulk",
-        "X-Auto-Response-Suppress": "OOF, AutoReply",
+        "Auto-Submitted": "auto-generated",
       },
     });
 

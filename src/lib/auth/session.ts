@@ -96,7 +96,11 @@ export async function syncSupabaseProfile(user: User): Promise<ProfileRow | null
 
     const refreshed = await dbQuery<ProfileRow>("select * from profiles where id = $1", [user.id]);
     const finalProfile = refreshed[0] ?? profile;
-    sendGreetingOnLogin(finalProfile.id, finalProfile.email, finalProfile.full_name).catch(() => {});
+    try {
+      await sendGreetingOnLogin(finalProfile.id, finalProfile.email, finalProfile.full_name);
+    } catch (err) {
+      console.error("[Session] Error sending greeting email:", err);
+    }
     return finalProfile;
   }
 
@@ -132,7 +136,11 @@ export async function syncSupabaseProfile(user: User): Promise<ProfileRow | null
   }
 
   if (inserted[0]) {
-    sendGreetingOnLogin(inserted[0].id, inserted[0].email, inserted[0].full_name).catch(() => {});
+    try {
+      await sendGreetingOnLogin(inserted[0].id, inserted[0].email, inserted[0].full_name);
+    } catch (err) {
+      console.error("[Session] Error sending greeting email:", err);
+    }
   }
 
   return inserted[0] ?? null;
