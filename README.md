@@ -1,4 +1,4 @@
-# Common Ground
+# VenueOne
 
 A production-oriented community hall and ground booking platform for India. Customers
 discover venues, request or instantly book fixed slots, and pay online. Venue owners
