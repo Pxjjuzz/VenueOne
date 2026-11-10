@@ -1,3 +1,16 @@
+function resolveSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL?.trim()) {
+    return process.env.NEXT_PUBLIC_SITE_URL.trim().replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.trim()}`;
+  }
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000";
+  }
+  return "https://venueone-team.vercel.app";
+}
+
 export const brand = {
   name: process.env.NEXT_PUBLIC_BRAND_NAME?.trim() || "VenueOne",
   tagline: "Space for every gathering.",
@@ -8,15 +21,7 @@ export const brand = {
     process.env.SUPPORT_EMAIL?.trim() ||
     process.env.GMAIL_USER?.trim() ||
     null,
-  siteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    (process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : "http://localhost:3000"),
+  siteUrl: resolveSiteUrl(),
 } as const;
 
 export const navigation = {
