@@ -111,11 +111,11 @@ export default function HomePage() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <ButtonLink href="/halls" size="lg" className="group">
-                Explore community halls
+                Find a community hall
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </ButtonLink>
               <ButtonLink href="/grounds" variant="secondary" size="lg" className="group">
-                Explore grounds
+                Find a ground
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </ButtonLink>
             </div>
