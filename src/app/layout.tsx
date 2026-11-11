@@ -18,7 +18,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   metadataBase: new URL(brand.siteUrl),
   title: {
-    default: `${brand.name} — Space for every gathering`,
+    default: `${brand.name}: Space for every gathering`,
     template: `%s · ${brand.name}`,
   },
   description: brand.description,
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     siteName: brand.name,
-    title: `${brand.name} — Space for every gathering`,
+    title: `${brand.name}: Space for every gathering`,
     description: brand.description,
   },
   robots: {

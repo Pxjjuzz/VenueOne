@@ -1,297 +1,275 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import {
   motion,
-  useMotionValue,
   useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
 } from "framer-motion";
-import {
-  Building2,
-  CalendarCheck,
-  CheckCircle2,
-  Clock,
-  Compass,
-  MapPin,
-  QrCode,
-  ShieldCheck,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { Reveal } from "@/components/motion/reveal";
 import { cn } from "@/lib/cn";
-import { brand } from "@/lib/brand";
+
+/**
+ * Axonometric of a generic hall. It is a drawing, not a venue, which is why the
+ * caption says so and why no price, capacity or availability number appears.
+ * The roof lifts as the section scrolls to expose the floor, so the motion
+ * explains what a listing actually has to describe.
+ */
+const HALL = { width: 420, depth: 300, height: 150 };
+const ROOF_LIFT = 118;
+const AXIS = Math.cos(Math.PI / 6);
+
+function project(x: number, y: number, z: number): readonly [number, number] {
+  return [(x - y) * AXIS, (x + y) * 0.5 - z];
+}
+
+function face(corners: ReadonlyArray<readonly [number, number, number]>): string {
+  return corners
+    .map(([x, y, z]) => {
+      const [px, py] = project(x, y, z);
+      return `${px.toFixed(1)},${py.toFixed(1)}`;
+    })
+    .join(" ");
+}
+
+const { width: W, depth: D, height: H } = HALL;
+
+const FLOOR = face([
+  [0, 0, 0],
+  [W, 0, 0],
+  [W, D, 0],
+  [0, D, 0],
+]);
+
+const ROOF = face([
+  [0, 0, H],
+  [W, 0, H],
+  [W, D, H],
+  [0, D, H],
+]);
+
+const WALL_LONG = face([
+  [0, 0, 0],
+  [W, 0, 0],
+  [W, 0, H],
+  [0, 0, H],
+]);
+
+const WALL_SHORT = face([
+  [0, 0, 0],
+  [0, D, 0],
+  [0, D, H],
+  [0, 0, H],
+]);
+
+/** One bay marked in the accent colour: the hours a booking would hold. */
+const BAY = face([
+  [70, 58, 1],
+  [212, 58, 1],
+  [212, 182, 1],
+  [70, 182, 1],
+]);
+
+const GRID_STEPS = [0.25, 0.5, 0.75];
+
+const COLUMNS: ReadonlyArray<readonly [number, number]> = [
+  [W, 0],
+  [0, D],
+  [W, D],
+];
+
+const points: Array<{ title: string; body: string }> = [
+  {
+    title: "The space",
+    body: "Dimensions, capacity, kitchen, stage, parking and step-free access come from the owner's listing and then an administrator's review. Nothing on a venue page is invented to fill a gap.",
+  },
+  {
+    title: "The slot",
+    body: "Availability is calculated from the booking engine and the bookings already held. Halls sell half days and full days, grounds sell hours, and a slot you cannot book is not shown as free.",
+  },
+  {
+    title: "The total",
+    body: "The amount is priced again on the server before payment, so the figure charged matches the itemised total shown to you. Refund terms are saved with the booking when it is created.",
+  },
+];
 
 export function Landing3DScroll({ className }: { className?: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
-  // Pointer position for subtle interactive 3D tilt
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const smoothMouseX = useSpring(mouseX, { stiffness: 75, damping: 20 });
-  const smoothMouseY = useSpring(mouseY, { stiffness: 75, damping: 20 });
-
-  // Scroll tracking across the section
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: stageRef,
     offset: ["start end", "end start"],
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 80,
-    damping: 24,
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 26,
     restDelta: 0.001,
   });
 
-  // 3D transformations driven by scroll
-  const scrollRotateX = useTransform(smoothProgress, [0, 0.4, 0.8, 1], [16, 2, -6, -14]);
-  const scrollRotateY = useTransform(smoothProgress, [0, 0.5, 1], [-12, 0, 10]);
-  const scrollTranslateZ = useTransform(smoothProgress, [0, 0.5, 1], [-60, 20, -40]);
-  const scrollScale = useTransform(smoothProgress, [0, 0.4, 0.8, 1], [0.92, 1, 0.98, 0.92]);
+  const roofY = useTransform(progress, [0.15, 0.72], [-18, -ROOF_LIFT]);
+  const rotateY = useTransform(progress, [0, 1], [-7, 7]);
+  const rotateX = useTransform(progress, [0, 1], [5, -3]);
+  const stageScale = useTransform(progress, [0, 1], [0.96, 1]);
 
-  // Combined rotation with mouse tilt
-  const mouseRotateX = useTransform(smoothMouseY, [-0.5, 0.5], [6, -6]);
-  const mouseRotateY = useTransform(smoothMouseX, [-0.5, 0.5], [-8, 8]);
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    const handleMove = (e: MouseEvent) => {
-      const { innerWidth, innerHeight } = window;
-      mouseX.set(e.clientX / innerWidth - 0.5);
-      mouseY.set(e.clientY / innerHeight - 0.5);
-    };
-    window.addEventListener("mousemove", handleMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMove);
-  }, [mouseX, mouseY, reduceMotion]);
+  const staticRoofY = -ROOF_LIFT * 0.9;
 
   return (
-    <div
-      ref={containerRef}
-      className={cn("relative py-12 lg:py-20 overflow-hidden", className)}
+    <section
+      ref={stageRef}
+      className={cn("border-y border-border bg-background-deep/45", className)}
+      aria-labelledby="spatial-heading"
     >
-      <div className="container-page">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10 lg:mb-14">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft/50 px-3.5 py-1 text-xs font-semibold text-primary">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            3D Spatial Experience
+      <div className="container-page py-16 sm:py-20 lg:py-24">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-16 lg:gap-y-6">
+          <div className="lg:col-start-2 lg:row-start-1">
+            <Reveal>
+              <p className="eyebrow">What a listing has to answer</p>
+              <h2 id="spatial-heading" className="display-2 mt-2 max-w-lg">
+                A space is only as bookable as the details behind it.
+              </h2>
+              <p className="measure mt-4 text-sm leading-relaxed text-muted sm:text-base">
+                Every venue page is built from three things you can check before money moves:
+                what the space is, when it is actually free, and what the total will be.
+              </p>
+            </Reveal>
           </div>
-          <h2 className="display-2 mt-3 text-foreground">
-            Explore venues with real depth &amp; verified slots.
-          </h2>
-          <p className="mt-3 text-sm sm:text-base leading-relaxed text-muted-strong">
-            Scroll down to interact with live spatial bookings. Every hall and ground has verified dimensions, capacity limits, and instant server confirmation.
-          </p>
-        </div>
 
-        {/* 3D Stage Container */}
-        <div
-          className="relative mx-auto w-full max-w-5xl [perspective:1400px] select-none"
-          style={{ minHeight: "480px" }}
-        >
-          <motion.div
-            className="relative w-full [transform-style:preserve-3d] transition-shadow"
-            style={
-              reduceMotion
-                ? undefined
-                : {
-                    rotateX: scrollRotateX,
-                    rotateY: scrollRotateY,
-                    scale: scrollScale,
-                    z: scrollTranslateZ,
-                  }
-            }
-          >
-            {/* 3D Base Plinth with Grid Texture */}
-            <div className="relative mx-auto w-full rounded-2xl border border-border/80 bg-gradient-to-b from-surface via-surface-raised to-stone/25 p-5 sm:p-8 shadow-[0_30px_90px_rgba(32,35,31,0.12)]">
-              <div
-                className="pointer-events-none absolute inset-0 rounded-2xl opacity-40"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(to right, rgba(36,76,59,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(36,76,59,0.12) 1px, transparent 1px)",
-                  backgroundSize: "32px 32px",
-                }}
-              />
-
-              {/* Grid of 3D Isometric Preview Cards */}
-              <div className="relative grid gap-5 sm:gap-6 md:grid-cols-3 [transform-style:preserve-3d]">
-                {/* 3D Card 1: Community Hall */}
+          <div className="lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-center">
+            <Reveal>
+              <div className="[perspective:1300px]">
                 <motion.div
-                  className="rounded-xl border border-border bg-surface p-5 shadow-[0_16px_36px_rgba(32,35,31,0.08)] [transform-style:preserve-3d]"
                   style={
                     reduceMotion
                       ? undefined
-                      : {
-                          transform: "translateZ(30px)",
-                        }
+                      : { rotateX, rotateY, scale: stageScale, transformStyle: "preserve-3d" }
                   }
-                  whileHover={{ y: -6, z: 45 }}
-                  transition={{ duration: 0.2 }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-0.5 text-[0.68rem] font-semibold text-primary">
-                      <Building2 className="h-3 w-3" />
-                      Community Hall
-                    </span>
-                    <span className="text-[0.65rem] font-medium uppercase tracking-wider text-muted">
-                      Live Slot
-                    </span>
-                  </div>
+                  <svg
+                    viewBox="-310 -300 720 720"
+                    className="mx-auto h-auto w-full max-w-[560px]"
+                    role="img"
+                    aria-label="Axonometric drawing of a community hall with its roof lifted away from the floor plan"
+                  >
+                    <defs>
+                      <linearGradient id="ax-floor" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stopColor="#f2f0e6" />
+                        <stop offset="1" stopColor="#e2ded0" />
+                      </linearGradient>
+                      <linearGradient id="ax-wall" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stopColor="#e6e3d6" />
+                        <stop offset="1" stopColor="#d3cfc1" />
+                      </linearGradient>
+                      <linearGradient id="ax-roof" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stopColor="#fbfaf6" />
+                        <stop offset="1" stopColor="#e9e6da" />
+                      </linearGradient>
+                    </defs>
 
-                  <h3 className="mt-3.5 font-display text-base font-semibold text-foreground">
-                    Heritage Banquet &amp; Hall
-                  </h3>
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
-                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                    Indiranagar, Bengaluru
-                  </p>
+                    {/* Floor plate and the grid that stands in for the plan */}
+                    <polygon points={FLOOR} fill="url(#ax-floor)" stroke="#a9b0a1" strokeWidth="1.2" />
+                    <g stroke="#244c3b" strokeWidth="0.9" opacity="0.22">
+                      {GRID_STEPS.map((fraction) => {
+                        const [ax, ay] = project(W * fraction, 0, 0);
+                        const [bx, by] = project(W * fraction, D, 0);
+                        return <line key={`x-${fraction}`} x1={ax} y1={ay} x2={bx} y2={by} />;
+                      })}
+                      {GRID_STEPS.map((fraction) => {
+                        const [ax, ay] = project(0, D * fraction, 0);
+                        const [bx, by] = project(W, D * fraction, 0);
+                        return <line key={`y-${fraction}`} x1={ax} y1={ay} x2={bx} y2={by} />;
+                      })}
+                    </g>
 
-                  <div className="mt-4 grid grid-cols-2 gap-2 border-y border-border/80 py-2.5 text-[0.72rem]">
-                    <div className="flex items-center gap-1.5 text-foreground-soft">
-                      <Users className="h-3.5 w-3.5 text-muted shrink-0" />
-                      <span>Capacity 450</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-foreground-soft">
-                      <Clock className="h-3.5 w-3.5 text-muted shrink-0" />
-                      <span>Half &amp; Full Day</span>
-                    </div>
-                  </div>
+                    <polygon points={BAY} fill="#c8d59b" opacity="0.85" stroke="#a9b57c" strokeWidth="1" />
 
-                  <div className="mt-3.5 flex items-baseline justify-between">
-                    <div>
-                      <span className="text-[0.65rem] text-muted uppercase">From</span>
-                      <p className="font-display text-lg font-bold text-primary">₹35,000</p>
-                    </div>
-                    <span className="text-[0.68rem] font-medium text-success bg-success-soft px-2 py-0.5 rounded">
-                      Available this weekend
-                    </span>
-                  </div>
-                </motion.div>
+                    {/* Far walls, without a roof in the way */}
+                    <polygon points={WALL_LONG} fill="url(#ax-wall)" stroke="#244c3b" strokeWidth="1.2" />
+                    <polygon points={WALL_SHORT} fill="#dcd8ca" stroke="#244c3b" strokeWidth="1.2" />
 
-                {/* 3D Card 2: Community Sports Ground */}
-                <motion.div
-                  className="rounded-xl border border-border bg-surface p-5 shadow-[0_16px_36px_rgba(32,35,31,0.08)] [transform-style:preserve-3d]"
-                  style={
-                    reduceMotion
-                      ? undefined
-                      : {
-                          transform: "translateZ(50px)",
-                        }
-                  }
-                  whileHover={{ y: -6, z: 65 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e8eed3] px-2.5 py-0.5 text-[0.68rem] font-semibold text-[#244c3b]">
-                      <Compass className="h-3 w-3" />
-                      Community Ground
-                    </span>
-                    <span className="text-[0.65rem] font-medium uppercase tracking-wider text-muted">
-                      Hourly
-                    </span>
-                  </div>
+                    {/* Columns standing at the free corners */}
+                    {COLUMNS.map(([x, y]) => {
+                      const [px, py] = project(x, y, 0);
+                      return (
+                        <line
+                          key={`column-${x}-${y}`}
+                          x1={px}
+                          y1={py}
+                          x2={px}
+                          y2={py - H}
+                          stroke="#244c3b"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          opacity="0.42"
+                        />
+                      );
+                    })}
 
-                  <h3 className="mt-3.5 font-display text-base font-semibold text-foreground">
-                    Kaveri Green Sports Turf
-                  </h3>
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
-                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                    Koramangala, Bengaluru
-                  </p>
-
-                  <div className="mt-4 grid grid-cols-2 gap-2 border-y border-border/80 py-2.5 text-[0.72rem]">
-                    <div className="flex items-center gap-1.5 text-foreground-soft">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
-                      <span>FIFA turf &amp; nets</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-foreground-soft">
-                      <Clock className="h-3.5 w-3.5 text-muted shrink-0" />
-                      <span>Floodlights ready</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3.5 flex items-baseline justify-between">
-                    <div>
-                      <span className="text-[0.65rem] text-muted uppercase">Rate</span>
-                      <p className="font-display text-lg font-bold text-primary">₹1,200<span className="text-xs font-normal text-muted">/hr</span></p>
-                    </div>
-                    <span className="text-[0.68rem] font-medium text-primary bg-primary-soft px-2 py-0.5 rounded">
-                      Instant Booking
-                    </span>
-                  </div>
-                </motion.div>
-
-                {/* 3D Card 3: Digital Booking Pass */}
-                <motion.div
-                  className="rounded-xl border border-primary/30 bg-gradient-to-br from-[#244c3b] to-[#173327] p-5 text-white shadow-[0_20px_45px_rgba(25,58,44,0.28)] [transform-style:preserve-3d]"
-                  style={
-                    reduceMotion
-                      ? undefined
-                      : {
-                          transform: "translateZ(70px)",
-                        }
-                  }
-                  whileHover={{ y: -6, z: 85 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[0.68rem] font-semibold text-[#c8d59b]">
-                      <CalendarCheck className="h-3 w-3" />
-                      Confirmed Pass
-                    </span>
-                    <span className="text-[0.65rem] font-mono tracking-wider text-white/70">
-                      BK-9482
-                    </span>
-                  </div>
-
-                  <h3 className="mt-3.5 font-display text-base font-semibold text-white">
-                    Official Venue Pass
-                  </h3>
-                  <p className="mt-1 text-xs text-white/70">
-                    Auto-generated receipt &amp; entry QR
-                  </p>
-
-                  <div className="my-3.5 flex items-center justify-between rounded-lg bg-white/10 p-2.5 backdrop-blur-sm">
-                    <div className="text-[0.72rem] space-y-0.5">
-                      <p className="text-white/60">Verified Entry</p>
-                      <p className="font-semibold text-white">Gate Pass Valid</p>
-                    </div>
-                    <QrCode className="h-9 w-9 text-[#c8d59b] shrink-0" />
-                  </div>
-
-                  <div className="flex items-center justify-between text-[0.72rem] text-white/80 border-t border-white/15 pt-2.5">
-                    <span className="flex items-center gap-1">
-                      <ShieldCheck className="h-3.5 w-3.5 text-[#c8d59b]" />
-                      Payment Verified
-                    </span>
-                    <span className="font-semibold text-[#c8d59b]">Invoice Attached</span>
-                  </div>
+                    {/* Roof. Lifts away from the plan as the section scrolls. */}
+                    <motion.g style={{ y: reduceMotion ? staticRoofY : roofY }}>
+                      <polygon
+                        points={ROOF}
+                        fill="#20231f"
+                        opacity="0.08"
+                        transform="translate(0 14)"
+                      />
+                      <polygon
+                        points={ROOF}
+                        fill="url(#ax-roof)"
+                        stroke="#244c3b"
+                        strokeWidth="1.8"
+                        strokeLinejoin="round"
+                      />
+                      <polygon
+                        points={ROOF}
+                        fill="none"
+                        stroke="#244c3b"
+                        strokeWidth="0.7"
+                        opacity="0.3"
+                        transform="translate(0 12)"
+                      />
+                    </motion.g>
+                  </svg>
                 </motion.div>
               </div>
 
-              {/* Bottom Feature Badges */}
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs text-muted">
-                <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Real availability from database
-                </span>
-                <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-                  <ShieldCheck className="h-4 w-4 text-primary" />
-                  Razorpay test &amp; live integration
-                </span>
-                <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Automatic Gmail confirmations &amp; invoices
-                </span>
-              </div>
-            </div>
-          </motion.div>
+              <p className="mt-4 max-w-md text-xs leading-relaxed text-muted">
+                An illustrative axonometric of a hall, not a venue listing. The roof lifts
+                away from the floor plan to show what a listing has to describe.
+              </p>
+            </Reveal>
+          </div>
+
+          <div className="lg:col-start-2 lg:row-start-2">
+            <Reveal delay={0.08}>
+              <ol className="border-t border-border">
+                {points.map((point, index) => (
+                  <li
+                    key={point.title}
+                    className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 border-b border-border py-5 sm:grid-cols-[3.5rem_minmax(0,1fr)]"
+                  >
+                    <span
+                      className="font-display text-sm font-semibold text-primary tabular"
+                      aria-hidden="true"
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-base font-semibold tracking-[-0.02em] text-foreground">
+                        {point.title}
+                      </h3>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted">{point.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </Reveal>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
-

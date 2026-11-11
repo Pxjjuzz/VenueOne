@@ -38,7 +38,7 @@ function Placeholder({ category }: { category: "hall" | "ground" }) {
       </svg>
       <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-[var(--radius-sm)] border border-white/50 bg-white/75 px-2.5 py-1.5 text-[0.65rem] font-medium text-foreground-soft backdrop-blur">
         <ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />
-        Illustrative placeholder — photographs are added by the venue
+        Illustrative placeholder: photographs are added by the venue
       </div>
     </div>
   );

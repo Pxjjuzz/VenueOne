@@ -259,6 +259,9 @@ async function notifyCapture(input: {
   changed: boolean;
   late: boolean;
   amountPaise: number;
+  paymentReference?: string | null;
+  paymentMethod?: string | null;
+  isDemo?: boolean;
 }): Promise<void> {
   const amount = formatMoney(input.amountPaise);
   if (input.late) {
@@ -317,6 +320,9 @@ async function notifyCapture(input: {
     feePaise: fb?.fee_paise ?? 0,
     taxPaise: fb?.tax_paise ?? 0,
     totalPaise: input.booking.total_paise,
+    paymentReference: input.paymentReference ?? null,
+    paymentMethod: input.paymentMethod ?? null,
+    isDemo: input.isDemo,
     bookingId: input.booking.id,
   });
 
@@ -757,6 +763,9 @@ export async function confirmDemoPayment(input: {
     changed: true,
     late: false,
     amountPaise: result.booking.total_paise,
+    paymentReference: `DEMO-${result.booking.reference}`,
+    paymentMethod: "Demo checkout",
+    isDemo: true,
   });
   await recordAudit({
     actorId: input.userId,
@@ -925,6 +934,9 @@ export async function verifyRazorpayPayment(input: {
     changed: captured.changed,
     late: captured.late,
     amountPaise: payment.amount_paise,
+    paymentReference: payment.provider_payment_id,
+    paymentMethod: payment.method,
+    isDemo: payment.is_demo,
   });
 
   await recordAudit({
@@ -1068,6 +1080,9 @@ async function applyCapturedWebhook(input: {
           changed: captured.changed,
           late: captured.late,
           amountPaise: payment.amount_paise,
+          paymentReference: payment.provider_payment_id,
+          paymentMethod: payment.method,
+          isDemo: payment.is_demo,
         });
       },
     };

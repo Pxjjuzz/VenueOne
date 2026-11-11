@@ -19,16 +19,27 @@ function fullUrl(path: string): string {
 export function renderGreetingEmail(input: {
   name?: string | null;
   email: string;
+  /** Defaults to a new-account welcome. Pass false for a returning sign-in. */
+  newAccount?: boolean;
 }): EmailMessage {
   const firstName = input.name?.trim() ? input.name.trim().split(" ")[0] : "there";
-  const heading = `Welcome to ${brand.name}, ${firstName}!`;
-  const subject = `Welcome to ${brand.name} — Space for every gathering`;
+  const returning = input.newAccount === false;
+  const heading = returning
+    ? `Welcome back, ${firstName}.`
+    : `Welcome to ${brand.name}, ${firstName}!`;
+  const subject = returning
+    ? `Welcome back to ${brand.name}`
+    : `Welcome to ${brand.name}: Space for every gathering`;
   const exploreUrl = fullUrl("/halls");
   const dashboardUrl = fullUrl("/dashboard");
 
   const bodyHtml = `
     <p style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#3f443e">
-      We are glad to have you with us. With ${brand.name}, finding and booking community halls and sports grounds is straightforward, transparent, and verified.
+      ${
+        returning
+          ? `Good to see you again. Your bookings, payment receipts and reminders are waiting in your dashboard.`
+          : `We are glad to have you with us. With ${brand.name}, finding and booking community halls and sports grounds is straightforward, transparent, and verified.`
+      }
     </p>
     <div style="margin:20px 0;padding:16px 18px;background:#f7f6f0;border-radius:10px;border-left:4px solid #244c3b">
       <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;color:#20231f">What you can do on ${brand.name}:</p>
@@ -42,12 +53,16 @@ export function renderGreetingEmail(input: {
   `;
 
   const html = emailLayout({
-    preheader: `Welcome to ${brand.name}. Discover and reserve verified community halls and grounds.`,
-    kicker: "Welcome to VenueOne",
+    preheader: returning
+      ? `Welcome back to ${brand.name}. Your dashboard is ready.`
+      : `Welcome to ${brand.name}. Discover and reserve verified community halls and grounds.`,
+    kicker: returning ? "Welcome back" : "Welcome to VenueOne",
     heading,
-    intro: "Your account is ready. Discover and book local spaces with clear terms and zero hidden charges.",
+    intro: returning
+      ? "Sign-in confirmed. Pick up where you left off."
+      : "Your account is ready. Discover and book local spaces with clear terms and zero hidden charges.",
     bodyHtml,
-    footerNote: "You are receiving this because you signed in to VenueOne.",
+    footerNote: `You are receiving this because you signed in to ${brand.name}.`,
   });
 
   const text = textLayout(
@@ -83,7 +98,7 @@ export function renderBookingCreatedEmail(input: {
 
   const isInstant = input.status === "awaiting_payment";
   const statusLabel = isInstant ? "Awaiting Payment" : "Pending Owner Review";
-  const subject = `Booking ${input.reference} — ${input.venueName} (${statusLabel})`;
+  const subject = `Booking ${input.reference}: ${input.venueName} (${statusLabel})`;
 
   const infoRows: Array<[string, string]> = [
     ["Reference", input.reference],
@@ -96,7 +111,7 @@ export function renderBookingCreatedEmail(input: {
 
   const bodyHtml = `
     <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#3f443e">
-      Hello ${firstName}, your booking request for <strong>${input.venueName}</strong> has been registered on the server.
+      Hello ${firstName}, your booking request for <strong>${input.venueName}</strong> has been received.
     </p>
     ${
       isInstant
@@ -122,7 +137,7 @@ export function renderBookingCreatedEmail(input: {
 
   const text = textLayout(
     [
-      `Booking ${input.reference} — ${input.venueName}`,
+      `Booking ${input.reference} at ${input.venueName}`,
       "",
       `Slot: ${input.dateStr} (${input.timeStr})`,
       `Total: ${formatMoney(input.totalPaise)}`,
@@ -153,11 +168,14 @@ export function renderPaymentInvoiceEmail(input: {
   totalPaise: number;
   paymentReference?: string | null;
   paymentMethod?: string | null;
+  isDemo?: boolean;
   bookingId: string;
 }): EmailMessage {
   const firstName = input.customerName?.trim() ? input.customerName.trim().split(" ")[0] : "there";
   const bookingUrl = fullUrl(`/dashboard/bookings/${input.bookingId}`);
-  const subject = `Payment Confirmed & Invoice: ${input.reference} — ${input.venueName}`;
+  const subject = input.isDemo
+    ? `Demo payment receipt: ${input.reference} for ${input.venueName}`
+    : `Payment confirmed and invoice: ${input.reference} for ${input.venueName}`;
 
   const lines: InvoiceLine[] = [
     { label: `${input.venueName} · ${input.slotLabel}`, amountPaise: input.subtotalPaise },
@@ -176,12 +194,14 @@ export function renderPaymentInvoiceEmail(input: {
       month: "short",
       year: "numeric",
     }),
-    status: "PAID",
+    status: input.isDemo ? "DEMO PAYMENT" : "PAID",
     lines,
     totalPaise: input.totalPaise,
     paymentReference: input.paymentReference,
     method: input.paymentMethod || "Online Payment",
-    note: "This document serves as your verified payment receipt for VenueOne. Keep this for your records.",
+    note: input.isDemo
+      ? "This booking was paid in labelled demonstration mode. No real money was collected."
+      : "This document serves as your verified payment receipt for VenueOne. Keep this for your records.",
   });
 
   const bodyHtml = `
@@ -243,7 +263,7 @@ export function renderCancellationEmail(input: {
   let color = "#8a5a12";
 
   if (input.status === "approved") {
-    title = "Booking Cancelled & Refund Processed";
+    title = "Booking Cancelled & Refund Initiated";
     statusBadge = "Approved";
     color = "#226a46";
   } else if (input.status === "rejected") {
@@ -252,7 +272,7 @@ export function renderCancellationEmail(input: {
     color = "#b03a3a";
   }
 
-  const subject = `${title}: Booking ${input.reference} — ${input.venueName}`;
+  const subject = `${title}: Booking ${input.reference} at ${input.venueName}`;
 
   const infoRows: Array<[string, string]> = [
     ["Reference", input.reference],
@@ -279,7 +299,7 @@ export function renderCancellationEmail(input: {
       <strong>Status:</strong> ${statusBadge}
       ${
         input.status === "approved" && input.refundAmountPaise
-          ? `<div style="margin-top:6px;color:#226a46">A refund of <strong>${formatMoney(input.refundAmountPaise)}</strong> has been initiated back to your original payment method. Depending on your bank, it typically reflects in 3–5 working days.</div>`
+          ? `<div style="margin-top:6px;color:#226a46">A refund of <strong>${formatMoney(input.refundAmountPaise)}</strong> has been approved and queued for processing. It is returned to your original payment method after the payment provider confirms it; the time it takes to appear depends on your bank.</div>`
           : input.status === "requested"
             ? "<div style=\"margin-top:6px\">Your cancellation request has been received and is being processed in accordance with the cancellation policy.</div>"
             : ""
@@ -295,12 +315,12 @@ export function renderCancellationEmail(input: {
     heading: title,
     intro: `Notice concerning your booking at ${input.venueName}.`,
     bodyHtml,
-    footerNote: "Refunds are processed to the source payment account via the payment gateway.",
+    footerNote: "Approved refunds are queued for the payment provider. The provider and your bank control settlement timing.",
   });
 
   const text = textLayout(
     [
-      `${title} — ${input.reference}`,
+      `${title}: ${input.reference}`,
       `Venue: ${input.venueName}`,
       `Date: ${input.dateStr}`,
       `Status: ${statusBadge}`,

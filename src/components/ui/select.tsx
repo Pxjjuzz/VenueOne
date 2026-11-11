@@ -70,6 +70,13 @@ export function Select({
   const [activeIndex, setActiveIndex] = useState(() =>
     selectedIndex >= 0 ? selectedIndex : 0,
   );
+  // Adjusting state during render, rather than in an effect, keeps the panel
+  // closed the moment the control becomes disabled.
+  const [wasDisabled, setWasDisabled] = useState(disabled);
+  if (disabled !== wasDisabled) {
+    setWasDisabled(disabled);
+    if (disabled && open) setOpen(false);
+  }
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -92,10 +99,6 @@ export function Select({
     if (!open) return;
     optionRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
   }, [open, activeIndex]);
-
-  useEffect(() => {
-    if (disabled) setOpen(false);
-  }, [disabled]);
 
   function openPanel() {
     if (disabled) return;

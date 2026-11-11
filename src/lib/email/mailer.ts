@@ -3,108 +3,148 @@ import "server-only";
 import nodemailer, { type Transporter } from "nodemailer";
 import { brand } from "@/lib/brand";
 
-export type SendEmailOptions = {
+export type MailMessage = {
   to: string;
   subject: string;
   html: string;
   text?: string;
   replyTo?: string;
+  from?: string;
 };
 
 export type MailResult = {
-  status: "sent" | "skipped" | "failed";
-  messageId: string | null;
+  status: "skipped" | "sent" | "failed";
+  providerId: string | null;
   error?: string;
 };
 
-let cachedTransporter: Transporter | null = null;
+let cachedTransporter: Transporter | null | undefined;
 
-export function getGmailUser(): string | null {
+function gmailUser(): string | null {
   return process.env.GMAIL_USER?.trim() || null;
 }
 
-export function getSupportEmail(): string {
+function gmailPassword(): string | null {
+  // Google shows app passwords in groups of four; the spaces are cosmetic.
+  const value = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, "").trim();
+  return value || null;
+}
+
+export function gmailConfigured(): boolean {
+  return Boolean(gmailUser() && gmailPassword());
+}
+
+export function emailConfigured(): boolean {
+  return gmailConfigured() || Boolean(process.env.RESEND_API_KEY?.trim());
+}
+
+export function emailProvider(): "gmail" | "resend" | null {
+  if (gmailConfigured()) return "gmail";
+  if (process.env.RESEND_API_KEY?.trim()) return "resend";
+  return null;
+}
+
+export function supportEmail(): string | null {
   return (
     process.env.SUPPORT_EMAIL?.trim() ||
-    process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() ||
-    getGmailUser() ||
-    "support@venueone.in"
+    brand.supportEmail ||
+    gmailUser() ||
+    null
   );
 }
 
-function getTransporter(): Transporter | null {
-  const user = getGmailUser();
-  const rawPass = process.env.GMAIL_APP_PASSWORD?.trim();
-  const pass = rawPass ? rawPass.replace(/\s+/g, "") : null;
+export function defaultFromAddress(): string {
+  const explicit = process.env.EMAIL_FROM?.trim();
+  if (explicit) return explicit;
+  const user = gmailUser();
+  return user ? `${brand.name} <${user}>` : `${brand.name} <notifications@example.com>`;
+}
 
-  if (!user || !pass) {
+function transporter(): Transporter | null {
+  if (cachedTransporter !== undefined) return cachedTransporter;
+  if (!gmailConfigured()) {
+    cachedTransporter = null;
     return null;
   }
 
-  if (!cachedTransporter) {
-    cachedTransporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user,
-        pass,
-      },
-      pool: true,
-      maxConnections: 3,
-      maxMessages: 50,
-    });
-  }
-
+  cachedTransporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user: gmailUser()!, pass: gmailPassword()! },
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
+  });
   return cachedTransporter;
 }
 
-export async function sendMail(options: SendEmailOptions): Promise<MailResult> {
-  const transporter = getTransporter();
-  const gmailUser = getGmailUser();
-  const supportEmail = getSupportEmail();
-
-  if (!transporter || !gmailUser) {
-    // If Gmail credentials are not yet configured, log cleanly so dev/test is unaffected
-    console.warn(
-      `[VenueOne Mailer] Skipped email to ${options.to} ("${options.subject}"). ` +
-        `GMAIL_USER and GMAIL_APP_PASSWORD must be configured in .env.local to send live emails.`,
-    );
-    return {
-      status: "skipped",
-      messageId: null,
-      error: "GMAIL_USER or GMAIL_APP_PASSWORD is not configured.",
-    };
-  }
-
-  // When sending via Gmail SMTP, the From address must match the authenticated Gmail user to pass Google SPF/DKIM
-  const fromAddress = `"${brand.name}" <${gmailUser}>`;
+async function sendViaGmail(message: MailMessage): Promise<MailResult> {
+  const transport = transporter();
+  if (!transport) return { status: "skipped", providerId: null };
 
   try {
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to: options.to,
-      replyTo: options.replyTo || supportEmail,
-      subject: options.subject,
-      html: options.html,
-      text: options.text,
+    const info = await transport.sendMail({
+      from: message.from ?? defaultFromAddress(),
+      to: message.to,
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      replyTo: message.replyTo ?? supportEmail() ?? undefined,
+    });
+    return { status: "sent", providerId: info.messageId ?? null };
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Gmail delivery failed", detail);
+    return { status: "failed", providerId: null, error: detail };
+  }
+}
+
+async function sendViaResend(message: MailMessage): Promise<MailResult> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) return { status: "skipped", providerId: null };
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        "X-Entity-Ref-ID": `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        "Auto-Submitted": "auto-generated",
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        from: message.from ?? defaultFromAddress(),
+        to: [message.to],
+        subject: message.subject,
+        html: message.html,
+        text: message.text,
+        reply_to: message.replyTo ?? supportEmail() ?? undefined,
+      }),
+      signal: AbortSignal.timeout(9000),
     });
 
-    return {
-      status: "sent",
-      messageId: info.messageId || null,
-    };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[VenueOne Mailer] Failed to send email via Gmail:", message);
-    return {
-      status: "failed",
-      messageId: null,
-      error: message,
-    };
+    if (!response.ok) {
+      const detail = await response.text();
+      console.error("Resend delivery failed", response.status, detail.slice(0, 300));
+      return {
+        status: "failed",
+        providerId: null,
+        error: `Resend responded with ${response.status}`,
+      };
+    }
+
+    const payload = (await response.json()) as { id?: string };
+    return { status: "sent", providerId: payload.id ?? null };
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Resend delivery failed", detail);
+    return { status: "failed", providerId: null, error: detail };
   }
+}
+
+/**
+ * Sends transactional mail through Gmail SMTP when credentials exist. Resend
+ * remains an optional fallback for deployments that prefer it.
+ */
+export async function sendMail(message: MailMessage): Promise<MailResult> {
+  if (gmailConfigured()) return sendViaGmail(message);
+  if (process.env.RESEND_API_KEY?.trim()) return sendViaResend(message);
+  return { status: "skipped", providerId: null };
 }

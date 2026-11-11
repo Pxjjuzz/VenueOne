@@ -19,7 +19,7 @@ const csp = [
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
-  serverExternalPackages: ["@electric-sql/pglite"],
+  serverExternalPackages: ["@electric-sql/pglite", "nodemailer"],
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",

@@ -2,9 +2,15 @@ import "server-only";
 
 import { dbQuery } from "@/lib/db";
 import { brand } from "@/lib/brand";
+import { sendMail, type MailResult } from "@/lib/email/mailer";
+import { sendLoginGreeting } from "@/lib/email/account";
+import {
+  button,
+  emailLayout,
+  textLayout,
+  type EmailMessage,
+} from "@/lib/email/render";
 import type { NotificationRow } from "@/lib/types";
-import { sendMail } from "@/lib/email/mailer";
-import { emailLayout, textLayout, button } from "@/lib/email/render";
 
 export type NotifyInput = {
   type: string;
@@ -12,6 +18,9 @@ export type NotifyInput = {
   body: string;
   link?: string | null;
   email?: boolean;
+  /** Rich, fully rendered message. Falls back to a branded generic layout. */
+  emailContent?: EmailMessage | null;
+  /** Legacy template fields still used by booking and payment services. */
   emailSubject?: string;
   emailHtml?: string;
   emailText?: string;
@@ -19,84 +28,44 @@ export type NotifyInput = {
 
 type Recipient = { id: string; email: string; full_name: string | null };
 
+function absoluteLink(link: string | null): string {
+  if (!link) return brand.siteUrl;
+  return link.startsWith("http") ? link : `${brand.siteUrl}${link}`;
+}
+
+function genericEmail(
+  title: string,
+  body: string,
+  link: string | null,
+): EmailMessage {
+  const url = absoluteLink(link);
+  return {
+    subject: title,
+    html: emailLayout({
+      preheader: body,
+      kicker: "Notification",
+      heading: title,
+      intro: body,
+      bodyHtml: button(url, `Open ${brand.name}`),
+    }),
+    text: textLayout([title, "", body], { url, label: `Open ${brand.name}` }),
+  };
+}
+
 async function sendEmail(
   recipient: Recipient,
   title: string,
   body: string,
   link: string | null,
-  customHtml?: string,
-  customText?: string,
-): Promise<{ status: "skipped" | "sent" | "failed"; providerId: string | null }> {
-  const absoluteLink = link
-    ? link.startsWith("http")
-      ? link
-      : `${brand.siteUrl}${link}`
-    : brand.siteUrl;
-
-  const html =
-    customHtml ||
-    emailLayout({
-      preheader: body.slice(0, 100),
-      kicker: "Notification",
-      heading: title,
-      intro: body,
-      bodyHtml: button(absoluteLink, `Open ${brand.name}`),
-      footerNote: `This notification relates to your ${brand.name} account.`,
-    });
-
-  const text =
-    customText ||
-    textLayout([title, "", body], { url: absoluteLink, label: `Open ${brand.name}` });
-
-  // 1. Primary transport: Gmail system via Nodemailer
-  const mailResult = await sendMail({
+  content?: EmailMessage | null,
+): Promise<MailResult> {
+  const message = content ?? genericEmail(title, body, link);
+  return sendMail({
     to: recipient.email,
-    subject: title,
-    html,
-    text,
+    subject: message.subject,
+    html: message.html,
+    text: message.text,
   });
-
-  if (mailResult.status === "sent") {
-    return {
-      status: "sent",
-      providerId: mailResult.messageId,
-    };
-  }
-
-  // 2. Secondary fallback: Resend if configured
-  const apiKey = process.env.RESEND_API_KEY;
-  if (apiKey) {
-    try {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: process.env.EMAIL_FROM || `${brand.name} <notifications@venueone.in>`,
-          to: [recipient.email],
-          subject: title,
-          html,
-        }),
-        signal: AbortSignal.timeout(7000),
-      });
-
-      if (!response.ok) {
-        const detail = await response.text();
-        console.error("Resend notification email failed", response.status, detail.slice(0, 300));
-        return { status: "failed", providerId: null };
-      }
-
-      const payload = (await response.json()) as { id?: string };
-      return { status: "sent", providerId: payload.id ?? null };
-    } catch (error) {
-      console.error("Resend notification email failed", error);
-      return { status: "failed", providerId: null };
-    }
-  }
-
-  return { status: mailResult.status, providerId: null };
 }
 
 async function deliver(recipients: Recipient[], input: NotifyInput) {
@@ -112,13 +81,22 @@ async function deliver(recipients: Recipient[], input: NotifyInput) {
 
     if (!input.email || !inserted[0]) continue;
 
+    const content =
+      input.emailContent ??
+      (input.emailSubject && input.emailHtml
+        ? {
+            subject: input.emailSubject,
+            html: input.emailHtml,
+            text: input.emailText ?? "",
+          }
+        : null);
+
     const email = await sendEmail(
       recipient,
-      input.emailSubject || input.title,
+      input.title,
       input.body,
       input.link ?? null,
-      input.emailHtml,
-      input.emailText,
+      content,
     );
     await dbQuery(
       `update notifications
@@ -146,46 +124,24 @@ export async function notifyUser(userId: string, input: NotifyInput): Promise<vo
   await notifyUsers([userId], input);
 }
 
-export async function sendGreetingOnLogin(
-  userId: string,
-  email: string,
-  fullName: string | null,
-): Promise<void> {
-  try {
-    const existing = await dbQuery<{ id: string }>(
-      `select id from notifications
-       where user_id = $1 and type = 'auth.greeting'
-         and email_status = 'sent'
-         and created_at > now() - interval '6 hours'
-       limit 1`,
-      [userId],
-    );
-    if (existing.length > 0) return;
-
-    const { renderGreetingEmail } = await import("@/lib/email/templates");
-    const mail = renderGreetingEmail({ name: fullName, email });
-
-    await notifyUser(userId, {
-      type: "auth.greeting",
-      title: mail.subject,
-      body: `Welcome to ${brand.name}, ${fullName || "there"}! Discover and reserve verified community halls and grounds.`,
-      link: "/dashboard",
-      email: true,
-      emailSubject: mail.subject,
-      emailHtml: mail.html,
-      emailText: mail.text,
-    });
-  } catch (error) {
-    console.error("Failed to send login greeting notification", error);
-  }
-}
-
 export async function notifyAdmins(input: NotifyInput): Promise<void> {
   const rows = await dbQuery<Recipient>(
     `select id, email, full_name from profiles
      where role = 'admin' and is_suspended = false`,
   );
   await deliver(rows, input);
+}
+
+/**
+ * Login greeting. Throttled inside the email module so repeated session
+ * refreshes do not send duplicate mail.
+ */
+export async function sendGreetingOnLogin(
+  userId: string,
+  _email?: string,
+  _fullName?: string | null,
+): Promise<void> {
+  await sendLoginGreeting(userId);
 }
 
 export async function listNotifications(userId: string, limit = 50): Promise<NotificationRow[]> {

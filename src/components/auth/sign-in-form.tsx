@@ -62,7 +62,7 @@ export function DevSignInForm({
           required
           options={accounts.map((account) => ({
             value: account.email,
-            label: `${account.label} — ${account.email}`,
+            label: `${account.label} (${account.email})`,
           }))}
         />
       </div>

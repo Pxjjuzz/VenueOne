@@ -188,9 +188,8 @@ export default function AboutPage() {
       <section className="container-page pb-4">
         <div className="rounded-[var(--radius-md)] border border-border bg-surface px-5 py-5 sm:px-6">
           <p className="text-sm leading-relaxed text-muted">
-            Legal documents are editable drafts. Bracketed placeholders must be
-            completed and reviewed by qualified counsel before real bookings or
-            payments are accepted. Read the{" "}
+            Our published policies cover how bookings, payments and personal data
+            are handled. Read the{" "}
             <Link href="/terms" className="font-medium text-primary underline underline-offset-4">Terms</Link>,{" "}
             <Link href="/privacy" className="font-medium text-primary underline underline-offset-4">Privacy Policy</Link>{" "}
             and{" "}

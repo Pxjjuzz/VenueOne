@@ -1,6 +1,6 @@
 # Security
 
-Common Ground handles identity, personal contact details, booking records and money
+VenueOne handles identity, personal contact details, booking records and money
 state. This document describes the controls implemented in Phase 1, the assumptions
 they rely on, and the gaps that remain.
 

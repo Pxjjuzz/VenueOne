@@ -25,8 +25,6 @@ export function ArchitecturalSculpture({
   const springY = useSpring(pointerY, { stiffness: 60, damping: 18, mass: 0.5 });
 
   const { scrollY } = useScroll();
-  const scrollRotateX = useTransform(scrollY, [0, 500], [0, -10]);
-  const scrollRotateY = useTransform(scrollY, [0, 500], [0, 12]);
   const scrollScale = useTransform(scrollY, [0, 500], [1, 0.94]);
   const scrollYOffset = useTransform(scrollY, [0, 500], [0, 30]);
 

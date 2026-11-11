@@ -49,7 +49,7 @@ describe("VenueOne Email System Templates", () => {
       totalPaise: 369000,
       bookingId: "test-inv-id",
     });
-    expect(email.subject).toContain("Payment Confirmed & Invoice");
+    expect(email.subject).toContain("Payment confirmed and invoice");
     expect(email.html).toContain("INV-BK-8899");
     expect(email.html).toContain("Total paid");
   });
@@ -64,7 +64,7 @@ describe("VenueOne Email System Templates", () => {
       refundAmountPaise: 1800000,
       bookingId: "test-cancel-id",
     });
-    expect(email.subject).toContain("Booking Cancelled & Refund Processed");
+    expect(email.subject).toContain("Booking Cancelled & Refund Initiated");
     expect(email.html).toContain("₹18,000");
   });
 

@@ -244,11 +244,12 @@ export async function reviewCancellation(input: {
       customer_id: string;
       owner_id: string | null;
       venue_name: string;
+      starts_at: Date;
     }>(
       `select c.id, c.booking_id, c.requested_by, c.status, c.refund_eligible,
               c.refund_percent, c.refund_amount_paise, c.reason,
               b.reference as booking_reference, b.status as booking_status,
-              b.total_paise, b.customer_id, v.owner_id, v.name as venue_name
+              b.total_paise, b.customer_id, b.starts_at, v.owner_id, v.name as venue_name
        from cancellations c
        join bookings b on b.id = c.booking_id
        join venues v on v.id = b.venue_id
@@ -353,7 +354,7 @@ export async function reviewCancellation(input: {
     const rejectedMail = renderCancellationEmail({
       reference: result.cancellation.booking_reference,
       venueName: result.cancellation.venue_name,
-      dateStr: "Scheduled event date",
+      dateStr: formatIstDateLong(result.cancellation.starts_at),
       status: "rejected",
       note: input.note,
       bookingId: result.cancellation.booking_id,
@@ -385,7 +386,7 @@ export async function reviewCancellation(input: {
   const approvedMail = renderCancellationEmail({
     reference: result.cancellation.booking_reference,
     venueName: result.cancellation.venue_name,
-    dateStr: "Scheduled event date",
+    dateStr: formatIstDateLong(result.cancellation.starts_at),
     status: "approved",
     refundAmountPaise: result.cancellation.refund_amount_paise,
     bookingId: result.cancellation.booking_id,

@@ -62,7 +62,7 @@ const copy = {
       "Find a hall for a family function, a public meeting, a workshop or a celebration. Compare capacity, facilities and clear half-day or full-day pricing.",
     emptyTitle: "Your next gathering starts here.",
     emptyDescription:
-      "No community halls have been listed yet. Check back soon as new spaces become available — or invite a venue you know to apply.",
+      "No community halls have been listed yet. Check back soon as new spaces become available, or invite a venue you know to apply.",
     icon: Building2,
   },
   ground: {

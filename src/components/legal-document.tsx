@@ -22,7 +22,7 @@ export function LegalDocument({ page }: { page: LegalPageRow }) {
           >
             <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             <div>
-              <p className="font-semibold">Draft — legal review required</p>
+              <p className="font-semibold">Draft: legal review required</p>
               <p className="mt-1">
                 Bracketed placeholders in this document must be completed with real
                 business and legal details, and the whole document must be reviewed

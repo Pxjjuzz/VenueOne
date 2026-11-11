@@ -418,11 +418,6 @@ export async function createBookingWithDatabase(
     };
   }
 
-  const action =
-    created.status === "pending_owner_approval"
-      ? "Your request is with the venue owner"
-      : "Complete payment to confirm";
-
   const dateStr = created.interval ? formatIstDateLong(created.interval.start) : "";
   const timeStr = created.interval
     ? formatTimeRange(created.interval.start, created.interval.end)

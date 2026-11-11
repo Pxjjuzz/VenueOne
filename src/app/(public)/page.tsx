@@ -2,12 +2,9 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  CalendarCheck,
   Check,
-  Compass,
   IndianRupee,
   FileCheck2,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { ArchitecturalSculpture } from "@/components/architectural-sculpture";
@@ -64,19 +61,16 @@ function GroundDrawing() {
 const steps = [
   {
     number: "01",
-    icon: Compass,
     title: "Find the right kind of space",
     body: "Browse community halls for gatherings or grounds for sport and outdoor events. Every listing shows the details that matter for its category.",
   },
   {
     number: "02",
-    icon: CalendarCheck,
     title: "Choose a real, available slot",
     body: "Availability comes from the booking engine, not a calendar image. Halls book by half or full day; grounds book by the hour.",
   },
   {
     number: "03",
-    icon: ShieldCheck,
     title: "Confirm with clear terms",
     body: "See the full price, cancellation terms and whether the venue books instantly or needs owner approval before you commit.",
   },
@@ -110,7 +104,7 @@ export default function HomePage() {
             </h1>
 
             <p className="measure mt-7 text-[1.0625rem] leading-[1.75] text-muted-strong sm:text-lg">
-              Discover and reserve community halls, event spaces and grounds — all
+              Discover and reserve community halls, event spaces and grounds, all
               in one place. Real availability, transparent pricing and booking
               terms you can read before you pay.
             </p>
@@ -264,19 +258,13 @@ export default function HomePage() {
 
           <div className="mt-9 grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-border bg-border md:grid-cols-3">
             {steps.map((step, index) => {
-              const Icon = step.icon;
               return (
                 <Reveal key={step.number} delay={index * 0.06} className="bg-surface">
                   <article className="flex h-full flex-col p-5 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <span className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-primary-soft text-primary">
-                        <Icon className="h-4 w-4" aria-hidden="true" />
-                      </span>
-                      <span className="text-[0.68rem] font-semibold tracking-[0.14em] text-muted tabular">
-                        {step.number}
-                      </span>
-                    </div>
-                    <h3 className="mt-5 font-display text-lg font-semibold tracking-[-0.025em] text-foreground">
+                    <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-muted tabular">
+                      {step.number}
+                    </span>
+                    <h3 className="mt-4 font-display text-lg font-semibold tracking-[-0.025em] text-foreground">
                       {step.title}
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
@@ -318,7 +306,7 @@ export default function HomePage() {
                 <p className="mt-4 text-sm leading-relaxed text-white/72">
                   We do not fill the platform with invented venues, ratings or
                   reviews. When no approved spaces exist, you will see a clear
-                  empty state — not a pretend marketplace. Owners can submit a
+                  empty state, not a pretend marketplace. Owners can submit a
                   venue for review at any time.
                 </p>
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">

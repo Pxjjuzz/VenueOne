@@ -9,7 +9,7 @@ import { dashboardHome, safeNextPath } from "@/lib/navigation";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Sign in — VenueOne",
+  title: "Sign in to VenueOne",
   description: "Sign in to VenueOne to manage bookings, venues and account details.",
   robots: { index: false, follow: false },
 };

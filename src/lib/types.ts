@@ -330,7 +330,7 @@ export const CANCELLATION_STATUS_LABELS: Record<CancellationStatus, string> = {
 
 export const REFUND_STATUS_LABELS: Record<RefundStatus, string> = {
   pending: "Pending",
-  initiated: "Initiated — awaiting provider",
+  initiated: "Initiated, awaiting provider",
   processed: "Processed",
   failed: "Failed",
 };

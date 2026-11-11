@@ -9,11 +9,12 @@ Phase 1 is a complete web application. Phase 2 (3D venue viewer) and Phase 3
 (Android app) are intentionally **not** included; the data model and public API keep
 room for them.
 
-> **Status.** Every flow described below is implemented and has been exercised locally
-> against a real PostgreSQL engine (PGlite). Real Supabase, Google OAuth, Razorpay,
-> Resend and Vercel integrations are implemented but could not be exercised here
-> because no external credentials were available. See `TESTING.md` for exactly what
-> was and was not verified.
+> **Status.** Every flow described below is implemented. The flows have been exercised
+> against a real PostgreSQL engine locally and against the configured Supabase
+> project, whose migrations are applied. Gmail SMTP is connected and its credentials
+> verified; Supabase, Google OAuth and Razorpay test-mode are configured. A live
+> end-to-end card payment has not been run from this environment. See `TESTING.md`
+> for exactly what was and was not verified.
 
 ---
 
@@ -49,12 +50,17 @@ room for them.
   policies, availability calendar and the booking widget.
 - Separate visual identities for halls (fixed half/full day) and grounds (hourly).
 - How it works, about, contact and list-your-venue pages.
-- Legal pages (`/terms`, `/privacy`, `/refund-policy`, `/about`, `/contact`) stored in
-  the database and clearly marked as drafts until a reviewer signs them off.
+- Legal pages (`/terms`, `/privacy`, `/refund-policy`) served from `legal_pages` and
+  seeded with the published VenueOne policies by `0006_venueone_policies.sql`. The
+  draft-review flag stays available for future administrator edits.
 
 ### Customer
 
 - Google sign-in in production; clearly labelled local development sign-in otherwise.
+- Transactional email over Gmail SMTP: a sign-in greeting (at most one per user per
+  20 hours), booking received, payment receipt with itemised invoice, cancellation
+  outcome and an upcoming-booking reminder. Every attempt is recorded in
+  `notifications` with its delivery status.
 - Dashboard with upcoming bookings, notification inbox and profile.
 - Booking detail with price snapshot, status history, payment panel, venue contact
   after acceptance, cancellation request and refund records.
@@ -205,7 +211,7 @@ migrates itself when the dev server starts.
 ## Project structure
 
 ```text
-commonground/
+venueone/
   src/
     app/
       (public)/            Marketing, discovery, venue, auth, legal pages

@@ -69,8 +69,19 @@ export function SiteFooter() {
             © {year} {brand.name}. All prices in Indian Rupees.
           </p>
           <p className="max-w-md leading-relaxed">
-            Legal pages are editable drafts and are clearly marked until reviewed
-            by a qualified professional.
+            Privacy, terms and refund policies are published at{" "}
+            <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
+              /privacy
+            </Link>
+            ,{" "}
+            <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
+              /terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/refund-policy" className="underline underline-offset-4 hover:text-foreground">
+              /refund-policy
+            </Link>
+            .
           </p>
         </div>
       </div>

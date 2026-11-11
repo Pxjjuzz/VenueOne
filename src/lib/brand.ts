@@ -15,7 +15,7 @@ export const brand = {
   name: process.env.NEXT_PUBLIC_BRAND_NAME?.trim() || "VenueOne",
   tagline: "Space for every gathering.",
   description:
-    "Discover and reserve community halls, event spaces and grounds — all in one place.",
+    "Discover and reserve community halls, event spaces and grounds, all in one place.",
   supportEmail:
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() ||
     process.env.SUPPORT_EMAIL?.trim() ||

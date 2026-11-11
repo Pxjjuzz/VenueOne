@@ -1,12 +1,12 @@
 # Deployment
 
-This runbook deploys Common Ground to Vercel with Supabase Postgres/Auth/Storage and
+This runbook deploys VenueOne to Vercel with Supabase Postgres/Auth/Storage and
 Razorpay. The database and application are independent: the app never relies on
 Supabase RLS for authorization, only as defense in depth.
 
-> No external account was available while this repository was built. The steps below
-> describe the intended production setup; they have not been executed end-to-end.
-> Treat the first deployment as an integration test and work through the checklist.
+> The database, Gmail SMTP sender and OAuth redirect URLs are configured for the
+> current deployment. Follow the checklist below when standing up a new environment;
+> treat the first deploy as an integration test.
 
 ---
 
@@ -16,7 +16,8 @@ Supabase RLS for authorization, only as defense in depth.
 - A Google Cloud OAuth 2.0 client
 - A Razorpay account in test mode
 - A Vercel project connected to this repository
-- Optional: a Resend API key for transactional email
+- A Gmail account with 2-Step Verification and an App Password (transactional email)
+- Optional: a Resend API key as a second transport
 
 ---
 
@@ -47,6 +48,7 @@ This applies, in order:
 - `0003_settings.sql` — platform settings and seeded legal pages
 - `0004_auth_fk.sql` — foreign keys from profiles to `auth.users`
 - `0005_functions.sql` — booking references, slot checks, expiry, rate-limit purge
+- `0006_venueone_policies.sql` — the published privacy, terms and refund policies
 
 Migrations are recorded in `schema_migrations` and are safe to re-run. Run them
 before the first deploy and after every schema change.
@@ -174,8 +176,8 @@ Set these for Production (and Preview where appropriate):
 
 ```dotenv
 NEXT_PUBLIC_SITE_URL=https://your-domain
-NEXT_PUBLIC_BRAND_NAME=Common Ground
-NEXT_PUBLIC_SUPPORT_EMAIL=support@your-domain
+NEXT_PUBLIC_BRAND_NAME=VenueOne
+NEXT_PUBLIC_SUPPORT_EMAIL=venueone.team@gmail.com
 
 DATABASE_URL=...
 NEXT_PUBLIC_SUPABASE_URL=...
@@ -188,9 +190,19 @@ RAZORPAY_KEY_ID=...
 RAZORPAY_KEY_SECRET=...
 RAZORPAY_WEBHOOK_SECRET=...
 CRON_SECRET=...
+
+GMAIL_USER=venueone.team@gmail.com
+GMAIL_APP_PASSWORD=...
+SUPPORT_EMAIL=venueone.team@gmail.com
+EMAIL_FROM=VenueOne <venueone.team@gmail.com>
+# Optional second transport, used only when the Gmail pair is absent.
 RESEND_API_KEY=...
-EMAIL_FROM=Common Ground <notifications@your-domain>
 ```
+
+`GMAIL_APP_PASSWORD` is a 16-character Google App Password, not the account
+password. Google displays it in four groups; spaces are ignored by the app. Mail is
+sent over `smtp.gmail.com` and `SUPPORT_EMAIL` becomes the reply-to address, so
+customer replies land in the same mailbox that sends the notifications.
 
 Do **not** set `DEV_AUTH_ENABLED`, `DEV_AUTH_PASSWORD` or `DEV_SESSION_SECRET` in
 production. Even if set, local sign-in refuses to run when `NODE_ENV=production` or
