@@ -14,6 +14,9 @@ build
 .data/
 uploads/
 
+# Blender backup files
+*.blend1
+
 # Environment
 .env
 .env.local
