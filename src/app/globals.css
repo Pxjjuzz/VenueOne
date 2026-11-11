@@ -109,6 +109,20 @@ body {
   border-radius: 2px;
 }
 
+/* Tailwind v4 preflight leaves buttons and listboxes on the arrow cursor. */
+button:not(:disabled),
+[role="combobox"]:not([aria-disabled="true"]),
+[role="option"],
+label[for],
+summary {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 h1,
 h2,
 h3,
