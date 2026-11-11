@@ -79,7 +79,7 @@ draft ──submit──▶ submitted ──review──▶ approved ──save�
 - Saving an `approved` venue sets it back to `submitted` (editorial changes need
   re-review).
 - Saving a `submitted`, `under_review` or `rejected` venue resets it to `draft`.
-- Operational actions — accepting bookings and time blocks — take effect immediately
+- Operational actions (accepting bookings and time blocks) take effect immediately
   and do not require review.
 - Publication approval copies proposed prices into the public approved amounts.
 
@@ -151,7 +151,7 @@ refreshes expired states before computing.
 transaction that first takes a per-venue advisory lock, then re-checks availability,
 inserts the booking and inserts every slot row. If two requests race, one transaction
 loses on the unique constraint or sees the lock and is rejected with a clean “no
-longer available” message. The database — not the calendar UI — is the guarantee.
+longer available” message. The database, not the calendar UI, is the guarantee.
 
 ---
 
@@ -271,8 +271,8 @@ depends on email delivery.
 
 `/api/cron/expire` (Bearer `CRON_SECRET`) runs:
 
-- `refresh_booking_states()` — expire stale holds and approval windows,
-- `purge_rate_limits()` — remove old counters.
+- `refresh_booking_states()`: expire stale holds and approval windows,
+- `purge_rate_limits()`: remove old counters.
 
 Expiry also runs lazily in the booking services, so a missed cron run cannot cause a
 double booking; it can only leave rows in a stale state until the next read.

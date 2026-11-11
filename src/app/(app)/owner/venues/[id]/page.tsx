@@ -274,7 +274,7 @@ export default async function OwnerVenueEditorPage({
                       </p>
                       {changed ? (
                         <p className="mt-0.5 text-[0.68rem] text-muted">
-                          Proposed {formatMoney(row.proposed_amount_paise)} — not public
+                          Proposed {formatMoney(row.proposed_amount_paise)}. Not public
                           until approved.
                         </p>
                       ) : null}

@@ -43,12 +43,12 @@ DATABASE_URL="..." npm run db:migrate
 
 This applies, in order:
 
-- `0001_init.sql` — schema, enums, indexes, search vector, booking overlap guard
-- `0002_rls.sql` — deny-by-default RLS and public read policies
-- `0003_settings.sql` — platform settings and seeded legal pages
-- `0004_auth_fk.sql` — foreign keys from profiles to `auth.users`
-- `0005_functions.sql` — booking references, slot checks, expiry, rate-limit purge
-- `0006_venueone_policies.sql` — the published privacy, terms and refund policies
+- `0001_init.sql`: schema, enums, indexes, search vector, booking overlap guard
+- `0002_rls.sql`: deny-by-default RLS and public read policies
+- `0003_settings.sql`: platform settings and seeded legal pages
+- `0004_auth_fk.sql`: foreign keys from profiles to `auth.users`
+- `0005_functions.sql`: booking references, slot checks, expiry, rate-limit purge
+- `0006_venueone_policies.sql`: the published privacy, terms and refund policies
 
 Migrations are recorded in `schema_migrations` and are safe to re-run. Run them
 before the first deploy and after every schema change.
