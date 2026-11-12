@@ -13,6 +13,7 @@ import {
 } from "@/lib/admin/service";
 import { reviewCancellation } from "@/lib/booking/cancellation";
 import { processRefund, syncRazorpayPayment } from "@/lib/payments/service";
+import { saveModelMetadata, setModelStatus } from "@/lib/models/service";
 import { legalPageSchema, settingsSchema } from "@/lib/validation";
 
 export type AdminActionState = {
@@ -74,6 +75,69 @@ export async function venuePublicationDecisionAction(
   revalidatePath("/owner/venues");
   revalidatePath(`/owner/venues/${venueId}`);
   return { success: result.message };
+}
+
+export async function venueModelMetadataAction(
+  _previous: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await adminSession();
+  if (!session.user) return { error: session.error };
+
+  const venueId = text(formData, "venueId");
+  if (!z.string().uuid().safeParse(venueId).success) {
+    return { error: "This venue could not be found." };
+  }
+
+  const accuracy = z.enum(["conceptual", "approximate", "verified"]).safeParse(text(formData, "accuracy"));
+  if (!accuracy.success) return { error: "Choose an accuracy level." };
+
+  const model = await saveModelMetadata({
+    venueId,
+    accuracy: accuracy.data,
+    notes: text(formData, "notes"),
+    actor: { id: session.user.id, email: session.user.email },
+  });
+  if (!model) return { error: "Upload a model before editing its details." };
+
+  revalidatePath(`/admin/venues/${venueId}`);
+  return { success: "Model details saved." };
+}
+
+export async function venueModelStatusAction(
+  _previous: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const session = await adminSession();
+  if (!session.user) return { error: session.error };
+
+  const venueId = text(formData, "venueId");
+  if (!z.string().uuid().safeParse(venueId).success) {
+    return { error: "This venue could not be found." };
+  }
+
+  const status = z
+    .enum(["draft", "under_review", "published", "rejected"])
+    .safeParse(text(formData, "status"));
+  if (!status.success) return { error: "Choose a valid model status." };
+
+  const result = await setModelStatus({
+    venueId,
+    status: status.data,
+    rejectionReason: text(formData, "reason"),
+    actor: { id: session.user.id, email: session.user.email },
+  });
+  if (result.error) return { error: result.error };
+
+  revalidatePath("/admin/venues");
+  revalidatePath(`/admin/venues/${venueId}`);
+  revalidatePath("/venues");
+  return {
+    success:
+      status.data === "published"
+        ? "Model published. Customers can now open it."
+        : "Model status updated.",
+  };
 }
 
 export async function ownerRequestDecisionAction(

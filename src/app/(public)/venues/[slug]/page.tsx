@@ -17,9 +17,12 @@ import {
 } from "lucide-react";
 import { BookingWidget } from "@/components/booking-widget";
 import { VenueGallery } from "@/components/venue-gallery";
+import { VenueModelExperience } from "@/components/venue-3d/venue-model-experience";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { getPublicVenueBySlug } from "@/lib/venues/queries";
+import { getPublishedVenueModel } from "@/lib/models/queries";
+import { modelPublicUrl } from "@/lib/models/storage";
 import { loadMonthAvailability } from "@/lib/booking/availability";
 import { getPlatformSettings } from "@/lib/settings";
 import { getSessionUser } from "@/lib/auth/session";
@@ -28,6 +31,7 @@ import { currentIstMonth, isoMonthKey } from "@/lib/time";
 import { formatMoney } from "@/lib/format";
 import { describePolicy } from "@/lib/policies";
 import { parseVenueAttributes } from "@/lib/venue-catalog";
+import { VENUE_MODEL_ACCURACY_LABELS } from "@/lib/types";
 
 export async function generateMetadata({
   params,
@@ -121,6 +125,7 @@ export default async function VenueDetailPage({
         : currentIstMonth();
   const availability = await loadMonthAvailability(venue.id, monthParam, venue.category);
   const attributes = parseVenueAttributes(venue.category, venue.attributes);
+  const venueModel = await getPublishedVenueModel(venue.id);
 
   const priceMap = new Map(pricing.map((row) => [row.slot, row.amount_paise]));
   const cityLine = [venue.city, venue.state, venue.pincode].filter(Boolean).join(", ");
@@ -222,7 +227,18 @@ export default async function VenueDetailPage({
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <div className="min-w-0">
-          <VenueGallery photos={galleryPhotos} category={venue.category} venueName={venue.name} />
+          {venueModel?.storage_path ? (
+            <VenueModelExperience
+              venueName={venue.name}
+              modelUrl={modelPublicUrl(venueModel.storage_path)}
+              posterUrl={venueModel.preview_path ? modelPublicUrl(venueModel.preview_path) : null}
+              accuracyLabel={VENUE_MODEL_ACCURACY_LABELS[venueModel.accuracy]}
+            />
+          ) : null}
+
+          <div id="venue-gallery">
+            <VenueGallery photos={galleryPhotos} category={venue.category} venueName={venue.name} />
+          </div>
 
           <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
             <div>

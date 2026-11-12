@@ -25,8 +25,11 @@ import { Badge, StatusBadge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { FormAlert } from "@/components/ui/field";
 import { AdminVenueDecision } from "@/components/admin/admin-venue-decision";
+import { AdminModelManager } from "@/components/admin/admin-model-manager";
 import { formatDateTime, formatMoney } from "@/lib/format";
 import { photoPublicUrl } from "@/lib/storage";
+import { getVenueModelForAdmin } from "@/lib/models/queries";
+import { modelPublicUrl } from "@/lib/models/storage";
 import {
   VENUE_STATUS_LABELS,
   venueStatusTone,
@@ -57,6 +60,10 @@ function attrFlag(value: unknown, label: string): string | null {
   return value === true ? label : null;
 }
 
+function isoDate(value: Date | string | null): string | null {
+  return value ? new Date(value).toISOString() : null;
+}
+
 export default async function AdminVenueReviewPage({
   params,
 }: {
@@ -70,6 +77,7 @@ export default async function AdminVenueReviewPage({
   if (!bundle) notFound();
 
   const blocks = await listVenueBlocks(bundle.venue.id);
+  const venueModel = await getVenueModelForAdmin(bundle.venue.id);
   const { venue, photos, pricing, hours, amenities, statusHistory } = bundle;
   const attributes = venue.attributes as Record<string, unknown>;
 
@@ -221,6 +229,37 @@ export default async function AdminVenueReviewPage({
                 ))}
               </ul>
             )}
+          </Panel>
+
+          <Panel
+            title="3D model"
+            description="Interior exploration, managed by administrators only"
+          >
+            <AdminModelManager
+              venueId={venue.id}
+              venueName={venue.name}
+              model={
+                venueModel
+                  ? {
+                      status: venueModel.status,
+                      accuracy: venueModel.accuracy,
+                      version: venueModel.version,
+                      fileBytes: venueModel.file_bytes,
+                      notes: venueModel.notes,
+                      uploadedAt: isoDate(venueModel.uploaded_at),
+                      publishedAt: isoDate(venueModel.published_at),
+                      updatedAt: isoDate(venueModel.updated_at) ?? new Date().toISOString(),
+                      rejectionReason: venueModel.rejection_reason,
+                    }
+                  : null
+              }
+              modelUrl={
+                venueModel?.storage_path ? modelPublicUrl(venueModel.storage_path) : null
+              }
+              posterUrl={
+                venueModel?.preview_path ? modelPublicUrl(venueModel.preview_path) : null
+              }
+            />
           </Panel>
 
           <Panel title="Description" description="Owner-supplied copy">

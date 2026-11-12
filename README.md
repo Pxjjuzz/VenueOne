@@ -24,6 +24,9 @@ in one place, and keeps a record of every step.
   surface.
 - See a venue page with photographs, approved pricing, opening hours, policies and a
   live availability calendar.
+- Step inside a 3D walkthrough on a laptop or desktop where an administrator has
+  published one for that venue. Phones show a short note instead and never download
+  the model.
 - Book instantly where the venue allows it, or send a request where the owner prefers
   to review first.
 - Pay online, receive an itemised invoice by email, and manage the booking from a
@@ -81,9 +84,11 @@ respects reduced-motion settings.
 
 ## Scope
 
-This is Phase 1 of the project: the complete booking web application. A 3D venue
-viewer (Phase 2) and an Android app (Phase 3) are not included, and nothing on the
-site pretends they are.
+This covers Phase 1 and the Phase 2 venue viewer: the complete booking web
+application, plus an optional 3D interior that a Super Admin attaches to a venue and
+publishes deliberately. No venue ships with a model switched on, and a published
+model is labelled as conceptual, approximate or verified so nobody mistakes it for a
+measured survey. An Android app (Phase 3) is not included.
 
 ## Policies and contact
 

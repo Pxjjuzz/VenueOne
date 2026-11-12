@@ -143,6 +143,34 @@ export type VenueStatusEventRow = {
   created_at: Date;
 };
 
+export type VenueModelStatus =
+  | "not_available"
+  | "draft"
+  | "under_review"
+  | "published"
+  | "rejected";
+export type VenueModelAccuracy = "conceptual" | "approximate" | "verified";
+
+export type VenueModelRow = {
+  id: string;
+  venue_id: string;
+  storage_path: string | null;
+  preview_path: string | null;
+  status: VenueModelStatus;
+  accuracy: VenueModelAccuracy;
+  version: number;
+  file_bytes: number | null;
+  notes: string;
+  uploaded_by: string | null;
+  uploaded_at: Date | null;
+  reviewed_by: string | null;
+  reviewed_at: Date | null;
+  published_at: Date | null;
+  rejection_reason: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type VenueWithOwner = VenueRow & {
   owner_name: string | null;
   owner_email: string | null;
@@ -336,6 +364,45 @@ export const REFUND_STATUS_LABELS: Record<RefundStatus, string> = {
 };
 
 export type StatusTone = "neutral" | "success" | "warning" | "danger" | "info";
+
+export const VENUE_MODEL_STATUS_LABELS: Record<VenueModelStatus, string> = {
+  not_available: "Not available",
+  draft: "Draft",
+  under_review: "Under review",
+  published: "Published",
+  rejected: "Rejected",
+};
+
+export const VENUE_MODEL_ACCURACY_LABELS: Record<VenueModelAccuracy, string> = {
+  conceptual: "Conceptual reconstruction",
+  approximate: "Approximate",
+  verified: "Verified",
+};
+
+export function venueModelStatusTone(status: VenueModelStatus): StatusTone {
+  switch (status) {
+    case "published":
+      return "success";
+    case "draft":
+    case "under_review":
+      return "warning";
+    case "rejected":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}
+
+export function venueModelAccuracyTone(accuracy: VenueModelAccuracy): StatusTone {
+  switch (accuracy) {
+    case "verified":
+      return "success";
+    case "approximate":
+      return "warning";
+    default:
+      return "neutral";
+  }
+}
 
 export function bookingStatusTone(status: BookingStatus): StatusTone {
   switch (status) {

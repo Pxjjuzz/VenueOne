@@ -15,15 +15,15 @@ export type StoredImage = {
   height: number;
 };
 
-function bucket(): string {
+export function storageBucket(): string {
   return process.env.SUPABASE_STORAGE_BUCKET || "venue-photos";
 }
 
-function localRoot(): string {
+export function localUploadRoot(): string {
   return path.join(process.cwd(), ".data", "uploads");
 }
 
-function supabaseAdmin() {
+export function supabaseStorageAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
@@ -32,7 +32,19 @@ function supabaseAdmin() {
   });
 }
 
-export function photoPublicUrl(storagePath: string): string {
+function bucket(): string {
+  return storageBucket();
+}
+
+function localRoot(): string {
+  return localUploadRoot();
+}
+
+function supabaseAdmin() {
+  return supabaseStorageAdmin();
+}
+
+export function publicStorageUrl(storagePath: string, localRoute = "/api/media"): string {
   const encoded = storagePath
     .split("/")
     .map((segment) => encodeURIComponent(segment))
@@ -42,7 +54,11 @@ export function photoPublicUrl(storagePath: string): string {
   if (url && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return `${url.replace(/\/$/, "")}/storage/v1/object/public/${bucket()}/${encoded}`;
   }
-  return `/api/media/${encoded}`;
+  return `${localRoute}/${encoded}`;
+}
+
+export function photoPublicUrl(storagePath: string): string {
+  return publicStorageUrl(storagePath);
 }
 
 export async function processVenueImage(
@@ -134,7 +150,7 @@ export async function deleteStoredPhoto(storagePath: string): Promise<void> {
   }
 }
 
-export async function readLocalPhoto(storagePath: string): Promise<Buffer | null> {
+export async function readLocalUpload(storagePath: string): Promise<Buffer | null> {
   const root = path.resolve(localRoot());
   const target = path.resolve(root, storagePath);
 
@@ -145,4 +161,8 @@ export async function readLocalPhoto(storagePath: string): Promise<Buffer | null
   } catch {
     return null;
   }
+}
+
+export async function readLocalPhoto(storagePath: string): Promise<Buffer | null> {
+  return readLocalUpload(storagePath);
 }

@@ -5,13 +5,19 @@ import { requireAdmin } from "@/lib/auth/session";
 import { listAdminVenues } from "@/lib/venues/queries";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { StatusBadge } from "@/components/ui/badge";
+import { StatusBadge, Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Pagination, TableShell, Td, Th } from "@/components/ui/table";
 import { formatDateTime, formatMoneyRange, pluralize } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { VENUE_STATUS_LABELS, venueStatusTone } from "@/lib/types";
+import {
+  VENUE_MODEL_STATUS_LABELS,
+  VENUE_STATUS_LABELS,
+  venueModelStatusTone,
+  venueStatusTone,
+} from "@/lib/types";
+import { listVenueModelSummaries } from "@/lib/models/queries";
 
 export const metadata: Metadata = {
   title: "Venue review",
@@ -40,6 +46,7 @@ export default async function AdminVenuesPage({
   const page = Math.max(1, Number(typeof params.page === "string" ? params.page : "1") || 1);
 
   const result = await listAdminVenues({ status, q, page, pageSize: 20 });
+  const models = await listVenueModelSummaries();
 
   return (
     <div className="space-y-6">
@@ -142,6 +149,16 @@ export default async function AdminVenuesPage({
                       label={VENUE_STATUS_LABELS[venue.status]}
                       tone={venueStatusTone(venue.status)}
                     />
+                    {models.get(venue.id) ? (
+                      <div className="mt-1.5">
+                        <Badge
+                          tone={venueModelStatusTone(models.get(venue.id)!.status)}
+                          className="text-[0.6rem]"
+                        >
+                          3D: {VENUE_MODEL_STATUS_LABELS[models.get(venue.id)!.status]}
+                        </Badge>
+                      </div>
+                    ) : null}
                   </Td>
                   <Td className="tabular">
                     {formatMoneyRange(venue.min_price_paise, venue.max_price_paise)}

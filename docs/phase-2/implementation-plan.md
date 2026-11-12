@@ -71,39 +71,79 @@ would have shown holes.
 
 ### Stage 3: viewer
 
-- `three`, `@react-three/fiber`, `@react-three/drei`.
-- `venue-model-experience.tsx`: gate, lazy import, entry and exit.
-- `venue-model-viewer.tsx`: canvas, GLTF, OrbitControls, reset, fullscreen,
-  loading progress, error boundary, WebGL cleanup.
-- Camera clamped to the hall so a user cannot end up under the floor or outside
-  the walls, with a reset control always visible.
+Complete. `three@0.187`, `@react-three/fiber@9`, `@react-three/drei@10`.
+
+- `src/lib/viewer/device.ts`: desktop and WebGL gate, pure and unit tested.
+- `venue-model-experience.tsx`: entry card, `useSyncExternalStore` device check,
+  lazy import on click, back to photographs.
+- `venue-model-viewer.tsx`: canvas, GLTF, OrbitControls with camera limits, reset,
+  fullscreen, byte progress, error boundary, `useGLTF.clear` on unmount.
+
+Evidence in `docs/phase-2/testing-report.md`: desktop viewer canvas 746 x 465 with
+a real WebGL context, one model request, orbit drag changed the frame, reset and
+back both worked, zero console or network errors. Fullscreen could not be verified
+headlessly and is recorded as such.
 
 ### Stage 4: database and storage
 
+Complete.
+
 - `0007_venue_models.sql`: table, checks, RLS, updated-at trigger.
-- `src/lib/models/storage.ts`: GLB validation (magic, version, declared length,
-  JSON chunk, triangle ceiling), upload, preview upload, delete.
+- `src/lib/models/glb.ts`: pure GLB validation (magic, version, declared length,
+  JSON chunk, triangle ceiling) and the storage path builders.
+- `src/lib/models/status.ts`: transition matrix, pure and unit tested.
+- `src/lib/models/storage.ts`: server upload and WebP preview normalisation.
 - `src/lib/models/queries.ts`: published lookup for the customer page, full lookup
   for admin.
-- `/api/models/[...path]`: local-filesystem mirror of `/api/media`.
+- `src/lib/models/service.ts`: metadata and status writes plus audit rows.
+- `/api/models/[...path]`: local-filesystem mirror of `/api/media`, restricted to
+  `venue-models/` and `.glb` / `.webp`.
+
+Evidence: upload returned `200` with version, triangle and byte counts; a cross-origin
+POST was rejected with 403; the media route served the GLB with the right type and
+cache header and returned 404 for a wrong prefix, traversal and a disallowed
+extension. The production migration has not been run yet; that is an operator step
+listed in `docs/phase-2/setup-and-maintenance.md`.
 
 ### Stage 5: admin
 
-- Section on `admin/venues/[id]`, matching the existing panel and badge language.
-- Upload, replace, accuracy, notes, review and publication transitions.
-- Inline preview using the same viewer component.
+Complete. `src/components/admin/admin-model-manager.tsx` plus
+`venueModelMetadataAction` and `venueModelStatusAction` in
+`src/app/actions/admin.ts`, mounted on `admin/venues/[id]` with a status badge in
+the venue list.
+
+- Upload and replace through `POST /api/admin/venues/[id]/model` with XHR progress,
+  a same-origin guard and a 40 MB early size check.
+- Accuracy, notes and the review, publish, unpublish and reject transitions, with
+  inline preview using the same viewer component.
+
+Evidence: the real admin UI moved a draft to `under_review` and then `published`,
+the public page gained the card only after publishing, and replacing the file
+produced version 2, hid the card and served the new path after republishing.
 
 ### Stage 6: customer
 
-- `Explore in 3D` card above the gallery only when a published model exists.
-- Inline expansion with back to photographs.
-- Mobile: message, no import, no GLB request.
+Complete. `Explore in 3D` card above `#venue-gallery`, rendered only when
+`getPublishedVenueModel` returns a row with a storage path, with an inline
+expansion and a back to photographs control.
+
+Evidence: desktop opened the viewer; at 390 x 844 the page showed the laptop
+message, made zero `/api/models/` requests, loaded zero Three.js chunks and rendered
+no canvas. A venue without a published model renders no card at all.
 
 ### Stage 7: testing
 
-Unit tests for the GLB validator, the storage path, status transitions and the
-desktop gate. Then build, typecheck, lint, and a browser pass with the network
-panel open to prove a phone-sized viewport makes no model request.
+Complete.
+
+- `glb.test.ts` (13), `status.test.ts` (11), `viewer/device.test.ts` (3) added;
+  `npm test` reports 64 passed across 9 files.
+- `npx tsc --noEmit`, `npm run lint` and `npm run build` are clean.
+- Browser pass over CDP at 1440 x 900 and 390 x 844, covering upload, publication,
+  the viewer, replacement, the media route and both failure states.
+
+Full results, including what could not be verified and why, are in
+`docs/phase-2/testing-report.md`. Operational steps are in
+`docs/phase-2/setup-and-maintenance.md`.
 
 ## Risks
 
