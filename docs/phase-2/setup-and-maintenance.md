@@ -34,6 +34,11 @@ The feature reuses the existing upload path, so there are no new environment var
 - `DATABASE_URL` selects the production database. Without it, local development uses
   PGlite in `.data/pglite` and local uploads in `.data/uploads`.
 
+The bucket itself is not created by the migrations. If a fresh Supabase project has no
+bucket, create a public bucket named by `SUPABASE_STORAGE_BUCKET` before the first
+upload. It must allow `image/jpeg`, `image/png`, `image/webp` and
+`model/gltf-binary`, and its file size limit must exceed the 40 MB model cap.
+
 ## Database migration
 
 The local PGlite database applies `0007_venue_models.sql` automatically the next time
@@ -143,6 +148,7 @@ The gate is checked before the Three.js bundle is imported:
 | Upload returns `403 Administrator access is required` | Session is not an admin, or the dev session cookie is stale |
 | Upload returns `403 This upload did not come from the admin panel` | The request carried a foreign `Origin`; the origin guard rejected it |
 | Viewer opens but the room is black | Model has no lights by design; the viewer supplies ambient, hemisphere and directional lights. Check that the GLB contains meshes and that the camera bounds are not tiny |
+| Console reports `WebAssembly.instantiate` blocked by CSP | `script-src` must include `'wasm-unsafe-eval'`; the GLTF loader compiles its meshopt decoder as soon as the viewer chunk loads |
 | Fullscreen does nothing | Browser denied `requestFullscreen`. The rejection is caught and logged; the rest of the viewer keeps working |
 | Model loads twice slowly | `useGLTF.clear(url)` runs on unmount, so a second open re-parses. That is intentional to release GPU memory |
 

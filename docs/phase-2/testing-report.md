@@ -120,13 +120,35 @@ after going through review again the public page requested
 | Model request blocked | `The 3D model did not load.` panel with `Try again`, gallery still present, 1 attempted request |
 | No published model | no entry card at all, page unchanged |
 
+## Live production check (12 November 2026)
+
+After the local run, the operator asked for the feature to be set up on the real
+deployment. That is a separate action from the verification above.
+
+- `npm run db:migrate` applied `0007_venue_models.sql` to the Supabase database.
+  It was the first time the migration ran anywhere other than PGlite.
+- The `venue-photos` bucket did not exist in the Supabase project, even though
+  Phase 1 assumed it. It was created as a public bucket with a 50 MB file size limit
+  and image plus `model/gltf-binary` MIME types.
+- One venue row and one published model row were provisioned by an operator script:
+  Sowbhagya Kalyana Mantapa, `approved`, model `published`, `conceptual`, version 1.
+  No prices, hours, contact details, photographs or room measurements were written,
+  because none of those are verified.
+- Live check at `https://venueone-team.vercel.app/venues/sowbhagya-kalyana-mantapa`:
+  the page renders, the 3D card appears, the viewer requests the Supabase-hosted GLB
+  (`200`, 1,212,008 bytes), and the canvas paints 181 distinct colours with luma 2 to
+  211. No loading or failure panel is shown.
+- The GLTF loader's meshopt decoder compiles WebAssembly when its chunk loads, which
+  the production CSP blocked with a console error. `script-src` now includes
+  `'wasm-unsafe-eval'`, which permits WebAssembly compilation without enabling
+  general eval.
+
 ## Not verified
 
 | Item | Why |
 | --- | --- |
 | Fullscreen entering and leaving | Headless Edge refused `requestFullscreen` with `TypeError: not granted`, and this build has no CDP permission to grant it. The control is present and the failure is caught and logged; the fullscreen path needs a real browser window. |
-| Upload to live Supabase Storage | Would write to the shared bucket and needs the production service-role key. The code path is the existing `supabaseStorageAdmin()` upload used by photographs. |
-| `0007_venue_models.sql` against the production database | `npm run db:migrate` has not been run against the live database. The migration is additive and idempotent, but it is still an operator step. |
+| Upload through the admin route into live Supabase Storage | The live bucket and storage path were exercised by the provisioning script, which uses the same SDK and options, not by the admin form. |
 | Google sign-in and owner flows | Unchanged by Phase 2; dev auth was used to reach the admin panel. |
 | Live Razorpay payment | Unrelated to this phase and still unverified from Phase 1. |
 
@@ -141,5 +163,6 @@ because three 0.187 drops `PCFSoftShadowMap`; that warning is now gone.
 
 `.data/pglite` and `.data/uploads` are gitignored. The verification venue is still in
 the local database, currently published with version 2, and can be removed with
-`Remove-Item -Recurse .data` when it is no longer useful. Nothing from this run exists
-in the repository or in production.
+`Remove-Item -Recurse .data` when it is no longer useful. The verification run itself
+wrote to neither the hosted database nor the storage bucket. The separate production
+provisioning is described above.
