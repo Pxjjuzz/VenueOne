@@ -361,20 +361,26 @@ export default async function VenueDetailPage({
                 Operating hours
               </h2>
               <div className="mt-3 overflow-hidden rounded-[var(--radius-md)] border border-border">
-                {WEEKDAY_ORDER.map((weekday) => {
-                  const row = hours.find((item) => item.weekday === weekday);
-                  return (
-                    <div
-                      key={weekday}
-                      className="flex items-center justify-between gap-4 border-b border-border bg-surface px-4 py-2.5 text-sm last:border-0"
-                    >
-                      <span className="text-foreground-soft">{WEEKDAY_LABELS[weekday]}</span>
-                      <span className="text-muted tabular">
-                        {!row || row.is_closed ? "Closed" : `${row.opens_at} – ${row.closes_at}`}
-                      </span>
-                    </div>
-                  );
-                })}
+                {hours.length === 0 ? (
+                  <p className="bg-surface px-4 py-3 text-sm text-muted">
+                    Opening hours have not been published yet.
+                  </p>
+                ) : (
+                  WEEKDAY_ORDER.map((weekday) => {
+                    const row = hours.find((item) => item.weekday === weekday);
+                    return (
+                      <div
+                        key={weekday}
+                        className="flex items-center justify-between gap-4 border-b border-border bg-surface px-4 py-2.5 text-sm last:border-0"
+                      >
+                        <span className="text-foreground-soft">{WEEKDAY_LABELS[weekday]}</span>
+                        <span className="text-muted tabular">
+                          {!row || row.is_closed ? "Closed" : `${row.opens_at} – ${row.closes_at}`}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
               <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
                 <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
