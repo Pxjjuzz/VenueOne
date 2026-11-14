@@ -76,6 +76,22 @@ All values are estimates chosen to fit the reported capacity and the stated
 
 Accessed 11 November 2026. Text facts only were used; no photographs were copied.
 
+## Commercial terms entered in production
+
+Recorded on 14 November 2026 so the listing could accept bookings before an owner
+takes it over. These are editable from the owner dashboard once an owner is attached.
+
+| Field | Value | Status |
+| --- | --- | --- |
+| Full day | ₹45,000 | Follows the WedMeGood rental figure; Mandap lists ₹40,000 per day |
+| Half day | ₹20,000 | Placeholder, not sourced |
+| Opening hours | 09:00 to 22:00, daily | Placeholder, not sourced |
+| Booking policy | Instant | Chosen because no owner exists to approve requests |
+
+The half-day price, the opening hours and the instant policy are assumptions, not
+venue facts. The full-day figure is the only priced value with a public source, and
+the sources disagree by ₹5,000.
+
 ## If this becomes a real listing
 
 Someone from VenueOne would need to walk the hall with a laser measure and record:

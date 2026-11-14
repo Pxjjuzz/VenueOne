@@ -143,10 +143,44 @@ deployment. That is a separate action from the verification above.
   `'wasm-unsafe-eval'`, which permits WebAssembly compilation without enabling
   general eval.
 
+## Making the live listing bookable (14 November 2026)
+
+The listing was published with no prices, no hours and bookings paused, so it could
+not be booked. One operator script filled in the minimum a booking needs:
+
+| Field | Value | Basis |
+| --- | --- | --- |
+| Full day | ₹45,000 | WedMeGood rental figure for the venue; Mandap lists ₹40,000 per day |
+| Half day | ₹20,000 | Placeholder, not quoted by any source |
+| Opening hours | 09:00 to 22:00, every day | Placeholder |
+| Booking policy | `instant` | No owner exists to approve a request |
+| Accepting bookings | `true` | Required for the quote to resolve |
+
+The venue description now states that the full-day price follows the published rental
+figure, that the half-day price and the hours are provisional, and that parking and
+changing rooms are reported by listings but not yet entered.
+
+Verification against the live deployment:
+
+| Check | Result |
+| --- | --- |
+| Venue page | `200`, prices render as ₹20,000 and ₹45,000, no "Pending approval" |
+| Operating hours | Seven rows, `09:00` to `22:00`, no empty state |
+| Booking policy copy | "Your slot is held for 20 minutes while you pay", "Instant confirmation" |
+| `GET /api/venues/{id}/availability?month=2026-11` | `200`, `minPricePaise` 2000000, 17 future days each with an available slot |
+| Full-day slot selected on 20 November | Quote shows Base price ₹45,000 and Total payable ₹45,000; CTA is "Sign in to book" |
+| Console and network errors during the above | None |
+
+A single booking was not submitted, because the live deployment has no test sign-in:
+dev auth is disabled in production, and no customer account password was available.
+The quote, availability and price path are verified; the write path is covered by the
+local suite.
+
 ## Not verified
 
 | Item | Why |
 | --- | --- |
+| Submitting a live booking through to the payment step | Production has no dev sign-in and no test customer password was available. Availability, quote and price rendering were verified without it. |
 | Fullscreen entering and leaving | Headless Edge refused `requestFullscreen` with `TypeError: not granted`, and this build has no CDP permission to grant it. The control is present and the failure is caught and logged; the fullscreen path needs a real browser window. |
 | Upload through the admin route into live Supabase Storage | The live bucket and storage path were exercised by the provisioning script, which uses the same SDK and options, not by the admin form. |
 | Google sign-in and owner flows | Unchanged by Phase 2; dev auth was used to reach the admin panel. |
