@@ -9,23 +9,23 @@ import { brand } from "@/lib/brand";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "What this platform is, what Phase 1 includes, and what is deliberately planned for later.",
+    "What this platform is, what is shipped today, and what is deliberately planned for later.",
 };
 
 const phases = [
   {
     icon: Layers3,
-    label: "Phase 1 · current",
+    label: "Phase 1 · shipped",
     title: "The web platform",
     body: "Discovery, owner onboarding and approval, venue submission and review, availability, bookings, test-mode payments, cancellation handling and administrative controls.",
     tone: "current" as const,
   },
   {
     icon: Compass,
-    label: "Phase 2 · planned",
-    title: "Interactive 3D venue viewer",
-    body: "An untextured, desktop-oriented viewer built from venue photographs and measurements. It is not part of the current release and no viewer is promised on a venue page yet.",
-    tone: "future" as const,
+    label: "Phase 2 · shipped",
+    title: "3D venue viewer",
+    body: "A desktop walkthrough that an administrator attaches to a venue and publishes deliberately. Each model is labelled conceptual, approximate or verified, so it is never mistaken for a measured survey. Phones show a short note and never download the model.",
+    tone: "current" as const,
   },
   {
     icon: Smartphone,
@@ -149,8 +149,8 @@ export default function AboutPage() {
             Current scope, stated without inflation.
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-muted">
-            The data model and frontend keep room for later phases, but planned work
-            is not presented as shipped work.
+            Phase 1 and Phase 2 are shipped and live. Phase 3 is planned, and planned
+            work is not presented as shipped work.
           </p>
         </div>
 

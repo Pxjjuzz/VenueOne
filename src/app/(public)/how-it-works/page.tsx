@@ -102,9 +102,10 @@ export default function HowItWorksPage() {
             From browsing to a confirmed booking, without guesswork.
           </h1>
           <p className="measure mt-5 text-[0.9375rem] leading-[1.8] text-muted-strong sm:text-base">
-            This page describes what the platform actually does in Phase 1. It does
-            not describe a future mobile app or an interactive 3D viewer; those are
-            separate, later phases.
+            This page describes what the platform does today: the Phase 1 booking web
+            application and, where an administrator has published one, the Phase 2 3D
+            walkthrough on a venue page. It does not describe the Android app planned
+            for Phase 3.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/halls">
