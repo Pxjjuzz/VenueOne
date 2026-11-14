@@ -176,11 +176,30 @@ dev auth is disabled in production, and no customer account password was availab
 The quote, availability and price path are verified; the write path is covered by the
 local suite.
 
+## Payment checkout headers (14 November 2026)
+
+Test checkout under the original headers opened, rendered the card form and asked for a
+contact number, but a card submission left an `about:blank` tab behind. The cause is the
+app's own policy, not Razorpay:
+
+- A popup opened by the page inherits the opener's CSP.
+- `form-action 'self'` then blocks the form Razorpay posts from that popup to its own
+  host, so the tab never navigates and stays blank.
+- A reduced reproduction with `form-action 'self'` left the popup on `about:blank`, and
+  allowing `https://*.razorpay.com` let it navigate.
+
+The headers now allow Razorpay in `form-action`, `frame-src`, `connect-src` and
+`img-src`, and `Cross-Origin-Opener-Policy` is `same-origin-allow-popups` so the popup
+can report the result back through `window.opener`. A production build serves the new
+values. The card step itself is still unverified end to end, because that needs a signed
+in customer.
+
 ## Not verified
 
 | Item | Why |
 | --- | --- |
 | Submitting a live booking through to the payment step | Production has no dev sign-in and no test customer password was available. Availability, quote and price rendering were verified without it. |
+| Completing the Razorpay card step after the header fix | The failure was reproduced and the fix verified at the header and popup level, but a signed-in session is needed to click through the live checkout. |
 | Fullscreen entering and leaving | Headless Edge refused `requestFullscreen` with `TypeError: not granted`, and this build has no CDP permission to grant it. The control is present and the failure is caught and logged; the fullscreen path needs a real browser window. |
 | Upload through the admin route into live Supabase Storage | The live bucket and storage path were exercised by the provisioning script, which uses the same SDK and options, not by the admin form. |
 | Google sign-in and owner flows | Unchanged by Phase 2; dev auth was used to reach the admin panel. |

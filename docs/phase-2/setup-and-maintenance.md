@@ -149,6 +149,7 @@ The gate is checked before the Three.js bundle is imported:
 | Upload returns `403 This upload did not come from the admin panel` | The request carried a foreign `Origin`; the origin guard rejected it |
 | Viewer opens but the room is black | Model has no lights by design; the viewer supplies ambient, hemisphere and directional lights. Check that the GLB contains meshes and that the camera bounds are not tiny |
 | Console reports `WebAssembly.instantiate` blocked by CSP | `script-src` must include `'wasm-unsafe-eval'`; the GLTF loader compiles its meshopt decoder as soon as the viewer chunk loads |
+| Razorpay opens a blank new tab after the card step | `form-action` must allow `https://*.razorpay.com`, because the popup inherits the opener's policy and posts a form into it. `frame-src` and `connect-src` also need Razorpay hosts, and `Cross-Origin-Opener-Policy` must be `same-origin-allow-popups` so the popup can report back |
 | Fullscreen does nothing | Browser denied `requestFullscreen`. The rejection is caught and logged; the rest of the viewer keeps working |
 | Model loads twice slowly | `useGLTF.clear(url)` runs on unmount, so a second open re-parses. That is intentional to release GPU memory |
 
