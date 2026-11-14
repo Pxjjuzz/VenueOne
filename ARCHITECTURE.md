@@ -281,9 +281,10 @@ double booking; it can only leave rows in a stale state until the next read.
 
 ## 12. Extensibility for Phase 2 and Phase 3
 
-- **Phase 2 (3D viewer):** a venue can gain a `media`/`scenes` table keyed by
-  `venue_id` without changing booking or payment code. Public venue pages already
-  receive a venue bundle; a scene component can be added beside the gallery.
+- **Phase 2 (3D viewer, shipped):** implemented as a `venue_models` table keyed by
+  `venue_id`, one row per venue with versioned storage paths. Booking and payment code
+  were not changed. The public venue page reads the published row and renders the
+  viewer beside the gallery.
 - **Phase 3 (Android):** the domain services are UI-agnostic. Exposing a versioned API
   means wrapping the same service functions in route handlers; no business rules need
   to move out of `src/lib`.

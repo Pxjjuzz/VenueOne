@@ -3,6 +3,10 @@
 Written after reading the Phase 1 codebase, not from assumptions. Anything marked
 "verified" was checked in this repository or against the running toolchain.
 
+Status: shipped on 14 November 2026 and live at
+<https://venueone-team.vercel.app/venues/sowbhagya-kalyana-mantapa>. Phase status
+across the project is in [ROADMAP.md](../../ROADMAP.md).
+
 ## What Phase 1 actually is
 
 | Area | Reality in this repository |
@@ -102,8 +106,8 @@ Complete.
 Evidence: upload returned `200` with version, triangle and byte counts; a cross-origin
 POST was rejected with 403; the media route served the GLB with the right type and
 cache header and returned 404 for a wrong prefix, traversal and a disallowed
-extension. The production migration has not been run yet; that is an operator step
-listed in `docs/phase-2/setup-and-maintenance.md`.
+extension. `npm run db:migrate` applied `0007_venue_models.sql` to the production
+Supabase database on 12 November 2026, its first run outside PGlite.
 
 ### Stage 5: admin
 

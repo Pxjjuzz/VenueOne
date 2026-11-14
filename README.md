@@ -90,6 +90,8 @@ publishes deliberately. No venue ships with a model switched on, and a published
 model is labelled as conceptual, approximate or verified so nobody mistakes it for a
 measured survey. An Android app (Phase 3) is not included.
 
+Phase status is tracked in [ROADMAP.md](ROADMAP.md).
+
 ## Policies and contact
 
 The published [privacy policy](https://venueone-team.vercel.app/privacy),
