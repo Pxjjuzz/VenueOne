@@ -8,7 +8,6 @@ import {
   CalendarX2,
   CheckCircle2,
   Clock3,
-  ImageOff,
   IndianRupee,
   Mail,
   MapPin,
@@ -26,8 +25,9 @@ import { ButtonLink } from "@/components/ui/button";
 import { FormAlert } from "@/components/ui/field";
 import { AdminVenueDecision } from "@/components/admin/admin-venue-decision";
 import { AdminModelManager } from "@/components/admin/admin-model-manager";
+import { AdminVenuePhotos } from "@/components/admin/admin-venue-photos";
 import { formatDateTime, formatMoney } from "@/lib/format";
-import { photoPublicUrl } from "@/lib/storage";
+import { MAX_PHOTOS_PER_VENUE, photoPublicUrl } from "@/lib/storage";
 import { getVenueModelForAdmin } from "@/lib/models/queries";
 import { modelPublicUrl } from "@/lib/models/storage";
 import {
@@ -205,30 +205,17 @@ export default async function AdminVenueReviewPage({
         <div className="space-y-6">
           <Panel
             title="Photographs"
-            description={`${photos.length} uploaded · first image is the public cover`}
+            description={`${photos.length} of ${MAX_PHOTOS_PER_VENUE} uploaded · first image is the public cover`}
           >
-            {photos.length === 0 ? (
-              <div className="rounded-[var(--radius-sm)] border border-dashed border-border-strong bg-surface-secondary/50 px-4 py-8 text-center">
-                <ImageOff className="mx-auto h-6 w-6 text-muted" aria-hidden="true" />
-                <p className="mt-2 text-sm font-medium text-foreground">No photographs uploaded</p>
-                <p className="mt-1 text-xs text-muted">At least one real photograph is required before submission.</p>
-              </div>
-            ) : (
-              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {photos.map((photo) => (
-                  <li key={photo.id} className="overflow-hidden rounded-[var(--radius-sm)] border border-border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photoPublicUrl(photo.storage_path)}
-                      alt={photo.alt_text}
-                      className="aspect-[4/3] w-full object-cover"
-                      loading="lazy"
-                    />
-                    <p className="truncate px-2 py-1.5 text-[0.62rem] text-muted">{photo.alt_text}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <AdminVenuePhotos
+              venueId={venue.id}
+              maxPhotos={MAX_PHOTOS_PER_VENUE}
+              photos={photos.map((photo) => ({
+                id: photo.id,
+                url: photoPublicUrl(photo.storage_path),
+                altText: photo.alt_text,
+              }))}
+            />
           </Panel>
 
           <Panel
