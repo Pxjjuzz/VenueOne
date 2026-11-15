@@ -149,25 +149,8 @@ export function VenueModelExperience({
           </p>
         </div>
 
-        <div className="shrink-0">
-          {device === "small-screen" ? (
-            <div className="rounded-[var(--radius-sm)] border border-border bg-surface-secondary px-3 py-2.5">
-              <p className="flex items-start gap-1.5 text-xs leading-relaxed text-muted">
-                <MonitorSmartphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
-                Interactive 3D needs a laptop or desktop. It is not loaded on phones,
-                to save data.
-              </p>
-              {variant === "public" ? (
-                <button
-                  type="button"
-                  onClick={scrollToPhotographs}
-                  className="mt-2 text-xs font-semibold text-primary underline underline-offset-4"
-                >
-                  Back to photographs
-                </button>
-              ) : null}
-            </div>
-          ) : (
+        {device !== "small-screen" ? (
+          <div className="sm:shrink-0">
             <Button
               type="button"
               variant={variant === "admin" ? "secondary" : "primary"}
@@ -185,9 +168,28 @@ export function VenueModelExperience({
               )}
               {device === "no-webgl" ? "WebGL unavailable" : "Explore in 3D"}
             </Button>
-          )}
-        </div>
+          </div>
+        ) : null}
       </div>
+
+      {device === "small-screen" ? (
+        <div className="mt-3 rounded-[var(--radius-sm)] border border-border bg-surface-secondary px-3 py-2.5 sm:mt-4">
+          <p className="flex items-start gap-1.5 text-xs leading-relaxed text-muted">
+            <MonitorSmartphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+            Interactive 3D needs a laptop or desktop. It is not loaded on phones,
+            to save data.
+          </p>
+          {variant === "public" ? (
+            <button
+              type="button"
+              onClick={scrollToPhotographs}
+              className="mt-2 text-xs font-semibold text-primary underline underline-offset-4"
+            >
+              Back to photographs
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {device === "no-webgl" ? (
         <p className="mt-3 text-xs leading-relaxed text-warning">
