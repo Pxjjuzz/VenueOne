@@ -7,7 +7,7 @@ merged, deployed and described honestly in `docs/`.
 | --- | --- | --- |
 | 1 | Booking web application | Shipped |
 | 2 | 3D venue viewer | Shipped 14 November 2026 |
-| 3 | Android app | Planned, not started |
+| 3 | Android app | In progress, public API shipped 16 November 2026 |
 
 ## Phase 1: booking web application
 
@@ -65,13 +65,24 @@ Shipped on 14 November 2026. Every stage in
 
 ## Phase 3: Android app
 
-Planned, not started. No code exists for it. Initial requirements:
-`docs/mobile/requirements.md`.
+In progress. The public v1 API foundation shipped on 16 November 2026. No app binary
+exists yet.
 
-- Wrap the existing domain services in a versioned API. Business rules stay in
-  `src/lib` and are not duplicated in the client.
-- Customer sign in, catalogue, venue pages with availability, booking and a payment
-  handoff.
+Requirements: `docs/mobile/requirements.md`. Milestones and the API contract:
+`docs/mobile/build-plan.md`.
+
+Shipped so far:
+
+- `GET /api/v1/venues`, `GET /api/v1/venues/{slug}` and
+  `GET /api/v1/venues/{slug}/availability`, all read-only and rate limited.
+- One shared server contract, so the app and the website cannot disagree on price,
+  availability or attribution.
+- Published venues only, paise in JSON, published model preview without the GLB path.
+
+Still planned:
+
+- Customer sign in, app shell, catalogue and venue pages.
+- Booking creation and payment handoff through Razorpay.
 - Owner and admin tools only if they are needed on a phone; the responsive web
   dashboards already work for most of that.
 - Reuse the same policies, cancellation rules and invoices so a booking made on a
