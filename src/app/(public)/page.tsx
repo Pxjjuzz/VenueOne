@@ -141,9 +141,6 @@ export default function HomePage() {
             <div className="absolute -right-12 top-8 hidden h-40 w-40 rounded-full border border-primary/15 lg:block" aria-hidden="true" />
             <div className="relative aspect-[1.06/1] w-full max-w-[600px] justify-self-center lg:justify-self-end">
               <ArchitecturalSculpture className="absolute inset-0" />
-              <div className="absolute bottom-3 left-3 hidden rounded-[var(--radius-sm)] border border-border bg-surface/90 px-3 py-2 text-[0.65rem] text-muted shadow-sm backdrop-blur sm:block">
-                Halls &amp; grounds
-              </div>
             </div>
           </div>
         </div>
