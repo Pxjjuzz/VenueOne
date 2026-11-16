@@ -142,7 +142,7 @@ export default function HomePage() {
             <div className="relative aspect-[1.06/1] w-full max-w-[600px] justify-self-center lg:justify-self-end">
               <ArchitecturalSculpture className="absolute inset-0" />
               <div className="absolute bottom-3 left-3 hidden rounded-[var(--radius-sm)] border border-border bg-surface/90 px-3 py-2 text-[0.65rem] text-muted shadow-sm backdrop-blur sm:block">
-                <span className="font-semibold text-foreground">Phase 1</span> · halls &amp; grounds
+                Halls &amp; grounds
               </div>
             </div>
           </div>
