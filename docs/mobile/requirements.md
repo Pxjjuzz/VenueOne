@@ -1,11 +1,8 @@
-# VenueOne mobile app: initial requirements
+# Phase 3 mobile app: initial requirements
 
 Status: draft, v0. Written 16 November 2026. Nothing is built yet. This file lists
 what the first mobile release must do, so the scope can be agreed and changed before
 any code is written.
-
-Naming: `ROADMAP.md` calls this Phase 3 (Android app). The product owner calls it the
-Phase 2 mobile app. The label is cosmetic. The scope below is what matters.
 
 ## 1. Scope
 

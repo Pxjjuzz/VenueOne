@@ -65,7 +65,8 @@ Shipped on 14 November 2026. Every stage in
 
 ## Phase 3: Android app
 
-Planned, not started. No code exists for it.
+Planned, not started. No code exists for it. Initial requirements:
+`docs/mobile/requirements.md`.
 
 - Wrap the existing domain services in a versioned API. Business rules stay in
   `src/lib` and are not duplicated in the client.
