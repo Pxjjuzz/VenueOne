@@ -146,13 +146,13 @@ export function VenuePhotoManager({
           <Field
             label="Image file"
             htmlFor="venue-photo"
-            hint="JPEG, PNG or WebP, at least 600 × 400 pixels and no larger than 8 MB. The server resizes it to WebP."
+            hint="JPEG, PNG, WebP or AVIF, at least 600 × 320 pixels and no larger than 8 MB. The server resizes it to WebP."
           >
             <Input
               id="venue-photo"
               name="photo"
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,image/avif"
               required
               className="h-auto py-2"
             />

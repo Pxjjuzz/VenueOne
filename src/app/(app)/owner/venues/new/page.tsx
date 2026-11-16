@@ -61,7 +61,7 @@ export default async function NewOwnerVenuePage() {
               <div>
                 <p className="text-sm font-medium text-foreground">At least one photograph</p>
                 <p className="mt-0.5 text-xs leading-relaxed text-muted">
-                  Real photographs only, 600 × 400 pixels or larger. The server resizes
+                  Real photographs only, 600 × 320 pixels or larger. The server resizes
                   uploads to WebP.
                 </p>
               </div>

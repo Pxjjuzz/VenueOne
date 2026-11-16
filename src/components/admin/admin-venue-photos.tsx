@@ -219,7 +219,7 @@ export function AdminVenuePhotos({
         <div>
           <p className="text-sm font-semibold text-foreground">Add a photograph</p>
           <p className="mt-0.5 text-[0.7rem] leading-relaxed text-muted">
-            JPEG, PNG or WebP, 600 × 400 pixels or larger, up to 8 MB. The server
+            JPEG, PNG, WebP or AVIF, 600 × 320 pixels or larger, up to 8 MB. The server
             resizes each file. {photos.length} of {maxPhotos} used. The first image is
             the public cover.
           </p>
@@ -234,7 +234,7 @@ export function AdminVenuePhotos({
             id="venue-photo-file"
             name="file"
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png,image/webp,image/avif"
             required
             disabled={uploading || atLimit}
             className="block w-full text-xs text-muted file:mr-3 file:rounded-[var(--radius-sm)] file:border file:border-border-strong file:bg-surface file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:border-primary/40 disabled:cursor-not-allowed"

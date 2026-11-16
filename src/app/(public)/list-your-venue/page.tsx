@@ -100,7 +100,7 @@ export default async function ListYourVenuePage() {
             <ul className="mt-3 space-y-2 text-sm text-muted-strong">
               <li className="flex items-start gap-2">
                 <ImagePlus className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                At least one real photograph, 600 × 400 pixels or larger.
+                At least one real photograph, 600 × 320 pixels or larger.
               </li>
               <li className="flex items-start gap-2">
                 <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />

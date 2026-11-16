@@ -115,6 +115,7 @@ export default async function VenueDetailPage({
   if (!bundle) notFound();
 
   const { venue, photos, pricing, hours, amenities, ownerBusinessName, ownerName } = bundle;
+  const platformManaged = !venue.owner_id;
   const [settings, user] = await Promise.all([getPlatformSettings(), getSessionUser()]);
   const initialDate = typeof query.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(query.date) ? query.date : undefined;
   const monthParam =
@@ -436,15 +437,19 @@ export default async function VenueDetailPage({
 
             <section aria-labelledby="managed-heading">
               <h2 id="managed-heading" className="font-display text-xl font-semibold tracking-[-0.03em]">
-                Managed by
+                {platformManaged ? "Published by" : "Managed by"}
               </h2>
               <p className="mt-2 text-sm text-muted">
-                {ownerBusinessName || ownerName || "A verified venue owner"} · Published after
-                platform review.
+                {platformManaged
+                  ? "The VenueOne team"
+                  : ownerBusinessName || ownerName || "A verified venue owner"}{" "}
+                · Published after platform review.
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
                 <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                Approved listing. Photographs and details are supplied by the venue.
+                {platformManaged
+                  ? "Approved listing. Photographs and details are published by the VenueOne team."
+                  : "Approved listing. Photographs and details are supplied by the venue."}
               </p>
             </section>
           </div>

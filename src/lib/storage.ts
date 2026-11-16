@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 
 export const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 export const MAX_PHOTOS_PER_VENUE = 8;
-const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp"]);
+const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp", "heif"]);
 
 export type StoredImage = {
   storagePath: string;
@@ -75,13 +75,13 @@ export async function processVenueImage(
   const metadata = await probe.metadata();
 
   if (!metadata.format || !ALLOWED_FORMATS.has(metadata.format)) {
-    throw new Error("Use a JPEG, PNG or WebP photograph.");
+    throw new Error("Use a JPEG, PNG, WebP or AVIF photograph.");
   }
   if (!metadata.width || !metadata.height) {
     throw new Error("The image could not be read.");
   }
-  if (metadata.width < 600 || metadata.height < 400) {
-    throw new Error("Use an image at least 600 × 400 pixels.");
+  if (metadata.width < 600 || metadata.height < 320) {
+    throw new Error("Use an image at least 600 × 320 pixels.");
   }
 
   const result = await sharp(input, { failOn: "error", limitInputPixels: 40_000_000 })
