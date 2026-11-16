@@ -249,7 +249,7 @@ export default async function AdminVenueReviewPage({
             />
           </Panel>
 
-          <Panel title="Description" description="Owner-supplied copy">
+          <Panel title="Description" description={venue.owner_id ? "Owner-supplied copy" : "Platform copy"}>
             <p className="whitespace-pre-line text-sm leading-relaxed text-muted-strong">
               {venue.description || "No description recorded."}
             </p>
@@ -420,9 +420,16 @@ export default async function AdminVenueReviewPage({
               <li className="flex items-start gap-2.5 text-muted-strong">
                 <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                 <span>
-                  {bundle.ownerName || "No owner name"}
-                  {bundle.ownerBusinessName ? (
+                  {venue.owner_id
+                    ? bundle.ownerName || "Owner account linked"
+                    : "Platform-managed listing"}
+                  {venue.owner_id && bundle.ownerBusinessName ? (
                     <span className="mt-0.5 block text-xs text-muted">{bundle.ownerBusinessName}</span>
+                  ) : null}
+                  {!venue.owner_id ? (
+                    <span className="mt-0.5 block text-xs text-muted">
+                      No owner account. The VenueOne team keeps this listing up to date.
+                    </span>
                   ) : null}
                 </span>
               </li>
