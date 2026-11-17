@@ -22,15 +22,17 @@ function paymentTone(status: string) {
 export function BookingSummaryCard({
   booking,
   compact = false,
+  href,
 }: {
   booking: BookingWithVenue;
   compact?: boolean;
+  href?: string;
 }) {
   const photo = booking.photo_path ? photoPublicUrl(booking.photo_path) : null;
 
   return (
     <Link
-      href={`/dashboard/bookings/${booking.id}`}
+      href={href ?? `/dashboard/bookings/${booking.id}`}
       className="group block rounded-[var(--radius-md)] border border-border bg-surface p-4 transition-shadow hover:shadow-[var(--shadow-md)] sm:p-5"
     >
       <div className="flex items-start gap-4">

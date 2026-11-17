@@ -94,7 +94,11 @@ export async function createBookingAction(
     return { error: result.error };
   }
 
-  redirect(`/dashboard/bookings/${result.bookingId}`);
+  const destination =
+    text(formData, "returnTo") === "app"
+      ? `/app/bookings/${result.bookingId}`
+      : `/dashboard/bookings/${result.bookingId}`;
+  redirect(destination);
 }
 
 const quoteSchema = z.object({

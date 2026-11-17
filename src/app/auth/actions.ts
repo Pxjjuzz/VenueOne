@@ -74,7 +74,7 @@ export async function devSignInAction(
   redirect(next);
 }
 
-export async function signOutAction(): Promise<void> {
+export async function signOutAction(formData?: FormData): Promise<void> {
   try {
     if (isSupabaseConfigured()) {
       const supabase = await createSupabaseServerClient();
@@ -84,5 +84,5 @@ export async function signOutAction(): Promise<void> {
     console.error("Sign out failed", error);
   }
   await clearDevSession();
-  redirect("/");
+  redirect(safeNextPath(formData?.get("next"), "/"));
 }

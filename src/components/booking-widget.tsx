@@ -586,6 +586,7 @@ export function BookingWidget({
               <input type="hidden" name="eventType" value={eventType} />
               <input type="hidden" name="notes" value={notes} />
               <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+              {app ? <input type="hidden" name="returnTo" value="app" /> : null}
 
               <div>
                 <label htmlFor="booking-notes" className="text-[0.72rem] font-semibold text-foreground-soft">
