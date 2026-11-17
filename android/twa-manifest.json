@@ -1,0 +1,44 @@
+{
+  "packageId": "app.venueone.mobile",
+  "host": "venueone-team.vercel.app",
+  "name": "VenueOne",
+  "launcherName": "VenueOne",
+  "display": "standalone",
+  "themeColor": "#244c3b",
+  "navigationColor": "#244c3b",
+  "navigationDividerColor": "#244c3b",
+  "backgroundColor": "#f6f5f0",
+  "enableNotifications": false,
+  "startUrl": "/app",
+  "iconUrl": "https://venueone-team.vercel.app/icons/icon-512.png",
+  "maskableIconUrl": "https://venueone-team.vercel.app/icons/maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\PRAJWAL\\.venueone\\venueone-release.jks",
+    "alias": "venueone"
+  },
+  "appVersionCode": 1,
+  "appVersion": "1.0.0",
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://venueone-team.vercel.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://venueone-team.vercel.app/",
+  "minSdkVersion": 24,
+  "orientation": "portrait",
+  "fingerprints": [
+    {
+      "name": "venueone-release",
+      "value": "17:F0:5A:E8:4A:84:DC:7F:80:AA:35:CB:A3:58:C6:ED:2B:21:5F:77:46:FF:42:B8:74:92:49:C9:7D:97:3E:9E"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}

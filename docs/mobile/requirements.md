@@ -1,8 +1,8 @@
 # Phase 3 mobile app: initial requirements
 
-Status: draft, v0. Written 16 November 2026. Nothing is built yet. This file lists
-what the first mobile release must do, so the scope can be agreed and changed before
-any code is written.
+Status: draft, v0. Written 16 November 2026. This file lists what the first mobile
+release must do, so the scope can be agreed and changed before any code is written.
+Section 12 records what shipped on 17 November 2026.
 
 ## 1. Scope
 
@@ -89,12 +89,25 @@ Owner and admin tools stay on the responsive web dashboards for this release.
 ## 10. Open questions
 
 1. Native wrapper (Expo or React Native) or a thin WebView shell that reuses web pages?
+   Answered for v1: a Trusted Web Activity, which is the web app inside Chrome, so
+   Google sign in and UPI intents work and the app installs from the site.
 2. Phone OTP only, or phone plus email from day one?
-3. Which Android versions must be supported?
+3. Which Android versions must be supported? Answered for v1: Android 7.0 and newer,
+   because the Android Browser Helper library requires API 24.
 4. Is a store listing part of this release, or is a direct APK enough at first?
 5. Should owner and admin get a separate app later, or stay on web permanently?
 
 ## 11. Next step
 
-Answer the five questions, then write a one page build plan with screens, API
-endpoints and a test list. No app code until that plan is agreed.
+The plan was written and the first release is built; see `docs/mobile/build-plan.md`.
+The questions still open are 2, 4 and 5: sign-in method beyond Google, store listing
+versus direct APK, and whether owner and admin ever need a separate app.
+
+## 12. What shipped on 17 November 2026
+
+`docs/mobile/build-plan.md` carries the milestone table and the release evidence. In
+short: `/app` is an installable app with Explore, Bookings and Account tabs, the venue
+page and booking flow reuse the website server actions, and a signed Android package
+(`app.venueone.mobile`, versionName 1.0.0, minSdk 24, targetSdk 36) opens the same pages
+in Chrome without a URL bar once `/.well-known/assetlinks.json` is served.
+

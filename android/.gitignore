@@ -1,0 +1,5 @@
+# Only the TWA source is tracked. Bubblewrap regenerates everything else.
+*
+!.gitignore
+!README.md
+!twa-manifest.json

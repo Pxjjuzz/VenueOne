@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.venueone.mobile",
+      "sha256_cert_fingerprints": [
+        "17:F0:5A:E8:4A:84:DC:7F:80:AA:35:CB:A3:58:C6:ED:2B:21:5F:77:46:FF:42:B8:74:92:49:C9:7D:97:3E:9E"
+      ]
+    }
+  }
+]

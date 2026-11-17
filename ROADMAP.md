@@ -7,7 +7,7 @@ merged, deployed and described honestly in `docs/`.
 | --- | --- | --- |
 | 1 | Booking web application | Shipped |
 | 2 | 3D venue viewer | Shipped 14 November 2026 |
-| 3 | Android app | In progress, public API shipped 16 November 2026 |
+| 3 | Android app | In progress, installable app and signed APK shipped 17 November 2026 |
 
 ## Phase 1: booking web application
 
@@ -65,11 +65,12 @@ Shipped on 14 November 2026. Every stage in
 
 ## Phase 3: Android app
 
-In progress. The public v1 API foundation shipped on 16 November 2026. No app binary
-exists yet.
+In progress. An installable app at `/app` and a signed Android package shipped on
+17 November 2026. Delivered weight is 93% of the six milestones; the two shortfalls are
+an in-app invoice view and a device-measured performance budget.
 
-Requirements: `docs/mobile/requirements.md`. Milestones and the API contract:
-`docs/mobile/build-plan.md`.
+Requirements: `docs/mobile/requirements.md`. Milestones, the API contract and the
+release evidence: `docs/mobile/build-plan.md`.
 
 Shipped so far:
 
@@ -78,15 +79,29 @@ Shipped so far:
 - One shared server contract, so the app and the website cannot disagree on price,
   availability or attribution.
 - Published venues only, paise in JSON, published model preview without the GLB path.
+- App shell at `/app` with Explore, Bookings and Account tabs, an offline fallback and a
+  web manifest, so the app installs from Chrome on Android.
+- Catalogue with search, city, price and sort filters, and pages.
+- Venue page with the live booking widget, pricing, hours and policies.
+- Booking creation, payment handoff, booking list, booking detail and cancellation,
+  all on the same server actions as the website. A booking made in the app opens in the
+  app, not on the website dashboard.
+- A signed Trusted Web Activity package: `app.venueone.mobile`, versionName 1.0.0,
+  minSdk 24, targetSdk 36, 1,181,462 bytes, signed with the release key.
+- `/.well-known/assetlinks.json` publishing the release fingerprint, which is what
+  removes the URL bar.
+
+Nothing about a venue is bundled in the app. Venue data comes from Supabase on each
+request with a 60 second cache, and every app page is `force-dynamic`, so a new venue or
+an edited price appears on refresh with no app update.
 
 Still planned:
 
-- Customer sign in, app shell, catalogue and venue pages.
-- Booking creation and payment handoff through Razorpay.
+- An in-app invoice view. An invoice is emailed as `INV-{reference}` today.
+- App-styled notifications. The current screen is the dashboard page.
+- A measured performance budget on a physical device, and a Play Console upload.
 - Owner and admin tools only if they are needed on a phone; the responsive web
   dashboards already work for most of that.
-- Reuse the same policies, cancellation rules and invoices so a booking made on a
-  phone matches one made on the web.
 
 ## Next work
 
@@ -111,3 +126,14 @@ These are open items from Phase 2, not a new phase.
 | `c8f5814` | Unpublished hours shown as unknown, not closed |
 | `c190494` | Live pricing and hours recorded for the demo listing |
 | `9fc5477` | Razorpay popups allowed to post back instead of blanking |
+
+## Phase 3 commit trail
+
+| Commit | Change |
+| --- | --- |
+| `26bbd7e` | Public v1 catalogue, venue and availability endpoints |
+| `c6e6658` | Installable app shell and live venue catalogue |
+| `872c877` | App venue page with the live booking widget |
+| `c2a6c73` | App bookings, booking details and the account tab |
+| Checkpoint 4 | Trusted Web Activity manifest, release APK and asset links |
+
