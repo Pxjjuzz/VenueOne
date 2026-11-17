@@ -135,7 +135,7 @@ The Android package is built with Bubblewrap as a Trusted Web Activity. Source i
 
 | Artifact | Size | Notes |
 | --- | --- | --- |
-| `app-release-signed.apk` | 1,181,462 bytes | Sideload target, minSdk 24, targetSdk 36, versionCode 1, versionName 1.0.0 |
+| `app-release-signed.apk` | 1,181,462 bytes | Sideload target, minSdk 24, targetSdk 36, versionCode 1, versionName 1.0.0. SHA-256 `8B4E54D13573E2EAEB9A51735BB52DEB67BF98804D7C5AC50CA8E54524CE6459` |
 | `app-release-bundle.aab` | 1,248,434 bytes | For a future Play Console upload |
 
 The APK is signed with the release key whose SHA-256 fingerprint is

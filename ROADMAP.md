@@ -135,5 +135,5 @@ These are open items from Phase 2, not a new phase.
 | `c6e6658` | Installable app shell and live venue catalogue |
 | `872c877` | App venue page with the live booking widget |
 | `c2a6c73` | App bookings, booking details and the account tab |
-| Checkpoint 4 | Trusted Web Activity manifest, release APK and asset links |
+| `5a31caf` | Trusted Web Activity manifest, release APK and asset links |
 
