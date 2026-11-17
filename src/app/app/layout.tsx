@@ -25,6 +25,9 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
+// Venue data changes without an app release, so no app page is prerendered.
+export const dynamic = "force-dynamic";
+
 export default function MobileAppLayout({
   children,
 }: {

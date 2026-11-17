@@ -44,6 +44,8 @@ type Props = {
   initialSlotType?: string;
   initialStartTime?: string;
   initialHours?: number;
+  // Keeps sign in and post booking navigation inside the mobile app shell.
+  app?: boolean;
 };
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -71,6 +73,7 @@ export function BookingWidget({
   initialSlotType,
   initialStartTime,
   initialHours,
+  app = false,
 }: Props) {
   const [month, setMonth] = useState(initialMonth.month);
   const [data, setData] = useState<MonthAvailability>(initialMonth);
@@ -257,7 +260,7 @@ export function BookingWidget({
     if (startTime) params.set("startTime", startTime);
     if (category === "ground") params.set("hours", String(hours));
     const query = params.toString();
-    return `/venues/${venueSlug}${query ? `?${query}` : ""}`;
+    return `${app ? "/app" : ""}/venues/${venueSlug}${query ? `?${query}` : ""}`;
   })();
 
   return (

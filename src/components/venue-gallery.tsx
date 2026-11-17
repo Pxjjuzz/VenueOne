@@ -75,14 +75,18 @@ export function VenueGallery({
       </div>
 
       {photos.length > 1 ? (
-        <div className="grid grid-cols-5 gap-2 sm:grid-cols-6" role="group" aria-label="Venue photographs">
+        <div
+          className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-6 sm:overflow-visible sm:px-0 sm:pb-0"
+          role="group"
+          aria-label="Venue photographs"
+        >
           {photos.map((photo, index) => (
             <button
               key={photo.id}
               type="button"
               onClick={() => setActive(index)}
               className={cn(
-                "relative aspect-[4/3] overflow-hidden rounded-[var(--radius-xs)] border-2 transition-colors",
+                "relative aspect-[4/3] w-16 shrink-0 overflow-hidden rounded-[var(--radius-xs)] border-2 transition-colors sm:w-auto",
                 index === active ? "border-primary" : "border-transparent opacity-80 hover:opacity-100",
               )}
               aria-label={`Show photograph ${index + 1}`}
