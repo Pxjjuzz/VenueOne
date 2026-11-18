@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, Images, MapPin, Trees, Users } from "lucide-react";
-import { formatMoneyRange, formatNumber } from "@/lib/format";
+import { Building2, ChevronRight, Images, MapPin, Trees, Users } from "lucide-react";
+import { formatMoney, formatNumber } from "@/lib/format";
 import { photoPublicUrl } from "@/lib/storage";
 import type { VenueWithOwner } from "@/lib/types";
 
@@ -15,18 +15,15 @@ export function MobileVenueCard({
   const photo = venue.photo_path ? photoPublicUrl(venue.photo_path) : null;
   const city = [venue.city, venue.state].filter(Boolean).join(", ");
   const isHall = venue.category === "hall";
-  const price =
-    venue.min_price_paise != null
-      ? formatMoneyRange(venue.min_price_paise, venue.max_price_paise)
-      : "Pricing pending";
+  const price = venue.min_price_paise != null ? formatMoney(venue.min_price_paise) : null;
 
   return (
-    <article className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface shadow-[var(--shadow-sm)]">
+    <article className="overflow-hidden rounded-[var(--radius-lg)] bg-surface shadow-[var(--shadow-md)] transition-transform duration-150 ease-out active:scale-[0.985]">
       <Link
         href={`/app/venues/${venue.slug}`}
-        className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]"
+        className="block focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--focus)]"
       >
-        <div className="relative aspect-[16/10] overflow-hidden bg-surface-secondary">
+        <div className="relative aspect-[4/3] overflow-hidden bg-surface-secondary">
           {photo ? (
             <Image
               src={photo}
@@ -37,50 +34,62 @@ export function MobileVenueCard({
               priority={priority}
             />
           ) : (
-            <div className="grid h-full place-items-center text-muted">
+            <div className="grid h-full place-items-center bg-[linear-gradient(150deg,#e9eee4,#d7e1d0)] text-primary/60">
               {isHall ? (
-                <Building2 className="h-8 w-8" aria-hidden="true" />
+                <Building2 className="h-10 w-10" aria-hidden="true" />
               ) : (
-                <Trees className="h-8 w-8" aria-hidden="true" />
+                <Trees className="h-10 w-10" aria-hidden="true" />
               )}
             </div>
           )}
 
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-[rgba(255,255,255,0.9)] px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-foreground-soft backdrop-blur">
-            {isHall ? <Building2 className="h-3 w-3" aria-hidden="true" /> : <Trees className="h-3 w-3" aria-hidden="true" />}
-            {isHall ? "Hall" : "Ground"}
-          </span>
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(to_top,rgba(9,14,11,0.62),transparent)]"
+            aria-hidden="true"
+          />
 
           {venue.photo_count > 1 ? (
-            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[rgba(32,35,31,0.72)] px-2 py-1 text-[0.62rem] font-medium text-white backdrop-blur">
+            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[rgba(12,18,14,0.55)] px-2.5 py-1 text-[0.66rem] font-semibold text-white backdrop-blur">
               <Images className="h-3 w-3" aria-hidden="true" />
               {venue.photo_count}
             </span>
           ) : null}
 
-          <span className="absolute bottom-3 left-3 rounded-full bg-[rgba(32,35,31,0.82)] px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
-            {price}
-            {!isHall && venue.min_price_paise != null ? " / hour" : ""}
-          </span>
+          <p className="absolute bottom-3 left-4 text-white">
+            <span className="block text-[0.6rem] font-medium uppercase tracking-[0.12em] text-white/75">
+              {price ? (isHall ? "Half day from" : "Per hour") : "Pricing"}
+            </span>
+            <span className="text-[1.08rem] font-semibold leading-tight tabular">
+              {price ?? "Pending"}
+            </span>
+          </p>
         </div>
 
-        <div className="p-4">
-          <h2 className="font-display text-[1.05rem] font-semibold leading-snug tracking-[-0.02em] text-foreground">
-            {venue.name}
-          </h2>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-            {city ? (
-              <span className="inline-flex items-center gap-1.5">
-                <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
-                {city}
-              </span>
-            ) : null}
+        <div className="px-4 pb-4 pt-3">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-[1.02rem] font-semibold leading-snug tracking-[-0.02em] text-foreground">
+              {venue.name}
+            </h2>
+            <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+          </div>
+
+          {city ? (
+            <p className="mt-1 flex items-center gap-1.5 text-[0.82rem] text-muted">
+              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              {city}
+            </p>
+          ) : null}
+
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
             {venue.capacity != null ? (
-              <span className="inline-flex items-center gap-1.5">
-                <Users className="h-3 w-3 shrink-0" aria-hidden="true" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-secondary px-2.5 py-1 text-[0.7rem] font-medium text-foreground-soft">
+                <Users className="h-3 w-3" aria-hidden="true" />
                 Up to {formatNumber(venue.capacity)}
               </span>
             ) : null}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-1 text-[0.7rem] font-semibold text-primary">
+              {venue.booking_policy === "instant" ? "Instant booking" : "On request"}
+            </span>
           </div>
         </div>
       </Link>

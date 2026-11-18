@@ -348,6 +348,115 @@ p {
   transform-style: preserve-3d;
 }
 
+/* Phone-first app surface. Scoped to /app so the marketing site keeps its
+   cream editorial palette and smaller radii. */
+.app-surface {
+  --background: #f3f4f1;
+  --background-deep: #e6e8e2;
+  --surface: #ffffff;
+  --surface-secondary: #eef0eb;
+  --surface-raised: #fafbf8;
+  --foreground: #0f1411;
+  --foreground-soft: #2b342e;
+  --muted: #68716b;
+  --muted-strong: #4d574f;
+  --primary: #0d6a45;
+  --primary-hover: #095336;
+  --primary-soft: #e1f0e8;
+  --accent: #c5e6a1;
+  --accent-soft: #edf7de;
+  --border: #e4e7e0;
+  --border-strong: #ced4cb;
+  --success: #157a4f;
+  --success-soft: #e0f2e8;
+  --error: #b23a3a;
+  --error-soft: #fae9e7;
+  --focus: #0d6a45;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --shadow-sm: 0 1px 2px rgba(15, 20, 17, 0.05);
+  --shadow-md: 0 8px 24px rgba(15, 20, 17, 0.08);
+  --shadow-lg: 0 22px 60px rgba(15, 20, 17, 0.2);
+  color: var(--foreground);
+}
+
+@keyframes app-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(6%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes app-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes app-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes app-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.app-sheet-in {
+  animation: app-sheet-in 320ms var(--ease-out) both;
+}
+
+.app-fade-in {
+  animation: app-fade-in 180ms ease-out both;
+}
+
+.app-rise {
+  animation: app-rise 420ms var(--ease-out) both;
+}
+
+.app-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-secondary);
+}
+
+.app-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: app-shimmer 1.5s infinite;
+}
+
+.app-hscroll {
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-hscroll > * {
+  scroll-snap-align: center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
