@@ -100,11 +100,27 @@ export type GroundAttributes = {
 
 export type VenueAttributes = HallAttributes | GroundAttributes;
 
+function attributeRecord(raw: unknown): Record<string, unknown> {
+  if (typeof raw === "string") {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return parsed && typeof parsed === "object"
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
+    }
+  }
+  return raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+}
+
 export function parseVenueAttributes(
   category: VenueCategory,
-  raw: Record<string, unknown> | null | undefined,
+  raw: unknown,
 ): VenueAttributes {
-  const value = raw ?? {};
+  // The postgres driver is configured without type fetching, so jsonb columns
+  // can arrive as strings. Accept both shapes here rather than at every caller.
+  const value = attributeRecord(raw);
   if (category === "hall") {
     const indoor = value.indoorOutdoor;
     return {

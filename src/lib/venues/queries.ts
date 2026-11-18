@@ -288,7 +288,9 @@ async function loadVenueBundle(
     photos,
     pricing,
     hours,
-    amenities: amenities.map((item) => item.name),
+    amenities: amenities
+      .map((item) => item.name)
+      .filter((name): name is string => typeof name === "string" && name.trim() !== ""),
     statusHistory,
     ownerName: owner[0]?.full_name ?? null,
     ownerEmail: owner[0]?.email ?? null,
