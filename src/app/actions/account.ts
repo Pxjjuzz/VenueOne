@@ -47,6 +47,8 @@ export async function updateProfileAction(
   });
 
   revalidatePath("/dashboard/profile");
+  revalidatePath("/app/account/profile");
+  revalidatePath("/app/account");
   return { success: "Profile updated." };
 }
 
@@ -56,6 +58,8 @@ export async function markNotificationsReadAction(): Promise<void> {
   await markAllNotificationsRead(user.id);
   revalidatePath("/dashboard/notifications");
   revalidatePath("/dashboard");
+  revalidatePath("/app/account/notifications");
+  revalidatePath("/app/account");
 }
 
 export async function requestAccountDeletionAction(
