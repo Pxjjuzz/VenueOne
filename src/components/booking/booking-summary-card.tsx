@@ -6,18 +6,11 @@ import {
   BOOKING_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
   bookingStatusTone,
+  paymentStatusTone,
   type BookingWithVenue,
 } from "@/lib/types";
 import { photoPublicUrl } from "@/lib/storage";
 import { cn } from "@/lib/cn";
-
-function paymentTone(status: string) {
-  if (status === "paid") return "success" as const;
-  if (status === "failed") return "danger" as const;
-  if (status === "processing") return "warning" as const;
-  if (status === "refunded" || status === "partially_refunded") return "info" as const;
-  return "neutral" as const;
-}
 
 export function BookingSummaryCard({
   booking,
@@ -57,7 +50,7 @@ export function BookingSummaryCard({
             <StatusBadge
               status={booking.payment_status}
               label={PAYMENT_STATUS_LABELS[booking.payment_status]}
-              tone={paymentTone(booking.payment_status)}
+              tone={paymentStatusTone(booking.payment_status)}
             />
           </div>
 

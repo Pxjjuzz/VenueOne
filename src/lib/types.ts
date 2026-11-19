@@ -421,6 +421,22 @@ export function bookingStatusTone(status: BookingStatus): StatusTone {
   }
 }
 
+export function paymentStatusTone(status: PaymentStatus): StatusTone {
+  switch (status) {
+    case "paid":
+      return "success";
+    case "processing":
+      return "warning";
+    case "failed":
+      return "danger";
+    case "refunded":
+    case "partially_refunded":
+      return "info";
+    default:
+      return "neutral";
+  }
+}
+
 export function venueStatusTone(status: VenueStatus): StatusTone {
   switch (status) {
     case "approved":

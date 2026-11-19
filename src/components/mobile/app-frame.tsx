@@ -3,11 +3,19 @@
 import { usePathname } from "next/navigation";
 import { AppTabBar } from "./app-tab-bar";
 
-// Venue pages are immersive: the photo pager owns the bottom bar space, so the
-// tab bar and its reserved padding are dropped there only.
+// Venue pages and detail screens are immersive: they own the bottom of the
+// screen, so the tab bar and its reserved padding are dropped there only.
+const DETAIL_ROUTES = ["/app/account/profile", "/app/account/notifications"];
+
+function isImmersive(pathname: string) {
+  if (pathname.startsWith("/app/venues/")) return true;
+  if (/^\/app\/bookings\/[^/]+/.test(pathname)) return true;
+  return DETAIL_ROUTES.includes(pathname);
+}
+
 export function AppFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "/app";
-  const immersive = pathname.startsWith("/app/venues/");
+  const immersive = isImmersive(pathname);
 
   return (
     <>
