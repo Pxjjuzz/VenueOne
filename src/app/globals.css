@@ -457,6 +457,29 @@ p {
   scroll-snap-align: center;
 }
 
+/* Receipts print as a plain sheet: no app chrome, no shadows, no side gutters. */
+@media print {
+  .app-no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .app-surface,
+  .app-surface > div,
+  #app-main {
+    max-width: none !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .app-print-root * {
+    box-shadow: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

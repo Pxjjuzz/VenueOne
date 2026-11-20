@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   CalendarDays,
   CheckCircle2,
+  ChevronRight,
   Clock3,
   CreditCard,
   Info,
@@ -10,6 +11,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  ReceiptText,
   ShieldCheck,
 } from "lucide-react";
 import { getSessionUser } from "@/lib/auth/session";
@@ -198,6 +200,22 @@ export default async function AppBookingDetailPage({
             View venue
           </Link>
         </div>
+
+        {hasCapturedPayment ? (
+          <Link
+            href={`/app/bookings/${booking.id}/receipt`}
+            className="mt-3 flex items-center justify-between gap-3 rounded-[var(--radius-lg)] bg-surface px-4 py-3.5 shadow-[var(--shadow-sm)] transition-transform active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]"
+          >
+            <span className="flex items-center gap-2.5 text-[0.85rem] font-medium text-foreground">
+              <ReceiptText className="h-4 w-4 text-primary" aria-hidden="true" />
+              Receipt
+            </span>
+            <span className="flex items-center gap-0.5 text-[0.75rem] font-medium text-muted">
+              View or print
+              <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </span>
+          </Link>
+        ) : null}
 
         {booking.status === "awaiting_payment" ? (
           <div className="mt-4">
